@@ -2,6 +2,8 @@
 
 Vexel is a modern, declarative GUI library for Minecraft mods that simplifies interface creation. Built on top of NanoVG, it offers both high-level declarative components and low-level rendering capabilities. Heavily inspired by Elementa, Vexel provides a clean API for creating responsive, animated user interfaces.
 
+Have questions? Join our [discord!](https://discord.gg/QHFWnydFXr)
+
 ## Features
 
 - **Declarative UI**: Build interfaces by describing what you want, not how to position it
