@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "vexel",
-	"version": "${version}",
+	"version": "${mod_version}",
 	"name": "Vexel",
 	"description": "A simple declarative rendering library built with lwjgl's NanoVG Renderer",
 	"authors": [
