@@ -1,0 +1,63 @@
+package xyz.meowing.vexel.core
+
+import net.minecraft.client.util.Window
+import xyz.meowing.vexel.Vexel
+import xyz.meowing.vexel.animations.AnimationManager
+import xyz.meowing.vexel.components.base.VexelElement
+import xyz.meowing.vexel.utils.MouseUtils
+import xyz.meowing.vexel.utils.render.NVGRenderer
+
+class VexelWindow {
+    val children: MutableList<VexelElement<*>> = mutableListOf()
+    val window: Window get() = Vexel.mc.window
+
+    fun addChild(element: VexelElement<*>) {
+        element.parent = this
+        children.add(element)
+    }
+
+    fun removeChild(element: VexelElement<*>) {
+        element.parent = null
+        children.remove(element)
+    }
+
+    fun draw() {
+        NVGRenderer.beginFrame(window.width.toFloat(), window.height.toFloat())
+        NVGRenderer.push()
+        children.forEach { it.render(0f, 0f) }
+        AnimationManager.update()
+        NVGRenderer.pop()
+        NVGRenderer.endFrame()
+    }
+
+    fun mouseClick(button: Int) {
+        children.reversed().any { it.handleMouseClick(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), button) }
+    }
+
+    fun mouseRelease(button: Int) {
+        children.reversed().forEach { it.handleMouseRelease(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), button) }
+    }
+
+    fun mouseMove() {
+        children.reversed().any { it.handleMouseMove(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat()) }
+    }
+
+    fun mouseScroll(horizontalDelta: Double, verticalDelta: Double) {
+        children.reversed().any { it.handleMouseScroll(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), horizontalDelta, verticalDelta) }
+    }
+
+    fun charType(keyCode: Int, scanCode: Int , charTyped: Char) {
+        children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
+    }
+
+    fun onWindowResize() {
+        children.forEach { it.onWindowResize() }
+    }
+
+    fun cleanup() {
+        children.forEach { it.destroy() }
+        children.clear()
+        AnimationManager.clear()
+        NVGRenderer.cleanCache()
+    }
+}

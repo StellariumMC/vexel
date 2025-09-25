@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "vexel",
+	"version": "${version}",
+	"name": "Vexel",
+	"description": "A simple declarative rendering library built with lwjgl's NanoVG Renderer",
+	"authors": [
+		"Aurielyn",
+        "MrFast"
+	],
+	"contact": {
+      "homepage": "https://meowing.xyz/",
+      "sources": "https://github.com/meowing-xyz/vexel-1.21"
+	},
+	"license": "GPL-3.0-or-later",
+	"icon": "assets/vexel/icon.png",
+	"environment": "*",
+    "mixins": [
+      "mixins.vexel.json"
+    ],
+	"depends": {
+        "fabricloader": ">=0.15.11",
+        "minecraft": "~${minor_mc_version}",
+        "java": ">=21",
+        "fabric-api": "*",
+        "fabric-language-kotlin": "*"
+	}
+}
