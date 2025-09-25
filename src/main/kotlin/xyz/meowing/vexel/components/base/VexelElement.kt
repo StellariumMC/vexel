@@ -161,7 +161,7 @@ abstract class VexelElement<T : VexelElement<T>>(
                     val index = parentElement.children.indexOf(this)
                     if (index > 0) {
                         val prev = parentElement.children[index - 1]
-                        prev.x + prev.width + xConstraint
+                        (prev.x + prev.width + xConstraint) + if (prev is Rectangle) - (prev.padding[1] + prev.padding[3]) else 0f
                     } else {
                         if (visibleParent != null) visibleParent.x + xConstraint else xConstraint
                     }
@@ -200,7 +200,7 @@ abstract class VexelElement<T : VexelElement<T>>(
                     val index = parentElement.children.indexOf(this)
                     if (index > 0) {
                         val prev = parentElement.children[index - 1]
-                        (prev.y + prev.height + yConstraint)
+                        (prev.y + prev.height + yConstraint) + if (parentElement is Rectangle) - (parentElement.padding[0]) else 0f
                     } else {
                         if (visibleParent != null) visibleParent.y + yConstraint else yConstraint
                     }
