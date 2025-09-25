@@ -1,37 +1,38 @@
 package xyz.meowing.vexel.core
 
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
-import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
-import org.lwjgl.glfw.GLFW
-import xyz.meowing.vexel.Vexel
-import xyz.meowing.vexel.core.VexelWindow
+import xyz.meowing.vexel.events.EventBus
+import xyz.meowing.vexel.events.GuiEvent
 
-abstract class VexelScreen : Screen(Text.literal("Canvas Screen")) {
+abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
+    var initialized = false
+        private set
+    var hasInitialized = false
+        private set
+
     val window = VexelWindow()
+    val eventCalls = mutableListOf<EventBus.EventCall>()
 
     final override fun init() {
-        afterInitialization()
-
-        ScreenEvents.BEFORE_INIT.register { _, screen, _, _ ->
-            ScreenKeyboardEvents.allowKeyPress(screen).register { _, key, scancode, modifiers ->
-                val charTyped = GLFW.glfwGetKeyName(key, scancode)?.firstOrNull() ?: '\u0000'
-
-                window.charType(key, scancode, charTyped)
-                true
-            }
-
-            GLFW.glfwSetCharCallback(Vexel.mc.window.handle) { _, codepoint ->
-                val charTyped = codepoint.toChar()
-
-                window.charType(GLFW.GLFW_KEY_UNKNOWN, 0, charTyped)
-            }
-        }
-
         super.init()
+
+        if (!hasInitialized) {
+            eventCalls.add(EventBus.register<GuiEvent.Key>(0, { event ->
+                window.charType(event.key, event.scanCode, event.character)
+            }))
+
+            hasInitialized = true
+            initialized = true
+
+            window.cleanup()
+
+            afterInitialization()
+        } else {
+            initialized = true
+        }
     }
 
     open fun afterInitialization() {}
@@ -62,6 +63,8 @@ abstract class VexelScreen : Screen(Text.literal("Canvas Screen")) {
 
     override fun close() {
         window.cleanup()
+        eventCalls.clear()
+        hasInitialized = false
         super.close()
     }
 

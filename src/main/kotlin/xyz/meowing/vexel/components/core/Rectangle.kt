@@ -32,6 +32,15 @@ open class Rectangle(
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
 
+    override fun onWindowResize() {
+        if (dropShadow) {
+            dropShadow = false
+            dropShadow = true
+        }
+
+        super.onWindowResize()
+    }
+
     override fun onRender(mouseX: Float, mouseY: Float) {
         if (!visible || (height - (padding[0] + padding[2])) == 0f || (width - (padding[1] + padding[3])) == 0f) return
 
@@ -51,7 +60,7 @@ open class Rectangle(
             NVGRenderer.translate(-centerX, -centerY)
         }
 
-        if(dropShadow) {
+        if (dropShadow) {
             NVGRenderer.dropShadow(x, y, width, height, 30f, 1f, borderRadius)
         }
 
