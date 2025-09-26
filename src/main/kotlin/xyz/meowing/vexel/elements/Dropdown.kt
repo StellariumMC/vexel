@@ -181,6 +181,8 @@ class DropDownPanel(
         .childOf(this)
         .dropShadow()
 
+    var optionHeight = 0f
+
     init {
         setSizing(Size.Auto, Size.Auto)
         setFloating()
@@ -199,6 +201,9 @@ class DropDownPanel(
                 .setPositioning(Pos.ParentPixels, Pos.ParentCenter)
                 .childOf(rect)
                 .ignoreMouseEvents()
+
+            rect.updateHeight()
+            optionHeight = rect.getAutoHeight() * 2.5f
         }
     }
 
@@ -206,7 +211,7 @@ class DropDownPanel(
         backgroundPopup.visible = sourceDropdown.isVisibleInScrollableParents()
 
         if (backgroundPopup.visible) {
-            backgroundPopup.setSizing(width, widthType, min(max(75f, options.size * 37f), 170f), Size.Pixels)
+            backgroundPopup.setSizing(width, widthType, min(max(70f, 22 + (options.size * optionHeight)), 140f), Size.Pixels)
         }
     }
 
