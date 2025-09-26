@@ -1,19 +1,20 @@
 package xyz.meowing.vexel.utils.render
 
+import com.mojang.blaze3d.opengl.GlConst
 import com.mojang.blaze3d.opengl.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gl.Framebuffer
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import net.minecraft.util.Identifier
-import org.lwjgl.nanovg.NVGColor
-import org.lwjgl.nanovg.NVGPaint
-import org.lwjgl.nanovg.NanoSVG
-import org.lwjgl.nanovg.NanoVG
-import org.lwjgl.nanovg.NanoVGGL3
+import org.lwjgl.nanovg.*
+import org.lwjgl.opengl.GL11.glPopAttrib
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
 import xyz.meowing.vexel.Vexel
+import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.mixins.AccessorGlResourceManager
 import xyz.meowing.vexel.utils.style.Color.Companion.alpha
 import xyz.meowing.vexel.utils.style.Color.Companion.blue
@@ -41,7 +42,7 @@ object NVGRenderer {
     private val nvgColor2: NVGColor = NVGColor.malloc()
 
     val defaultFont =
-        Font("Default", Vexel.mc.resourceManager.getResource(Identifier.of("vexel:font.ttf")).get().inputStream)
+        Font("Default", mc.resourceManager.getResource(Identifier.of("vexel:font.ttf")).get().inputStream)
 
     private val fontMap = HashMap<Font, NVGFont>()
     private val fontBounds = FloatArray(4)
@@ -68,7 +69,10 @@ object NVGRenderer {
         previousProgram =
             ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as AccessorGlResourceManager).currentProgram().glRef
 
-        val framebuffer = Vexel.mc.framebuffer
+        val framebuffer = mc.framebuffer ?: return
+
+        if (vg == -1L || framebuffer.colorAttachment == null) return
+
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
             (RenderSystem.getDevice() as GlBackend).framebufferManager,
             null
@@ -76,7 +80,6 @@ object NVGRenderer {
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
         GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
         GlStateManager._activeTexture(GL30.GL_TEXTURE0)
-        GlStateManager._bindTexture(0)
 
         NanoVG.nvgBeginFrame(vg, width, height, 1f)
         NanoVG.nvgTextAlign(vg, NanoVG.NVG_ALIGN_LEFT or NanoVG.NVG_ALIGN_TOP)

@@ -63,6 +63,7 @@ abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
 
     override fun close() {
         window.cleanup()
+        eventCalls.forEach { it.unregister() }
         eventCalls.clear()
         hasInitialized = false
         super.close()
