@@ -192,15 +192,37 @@ object NVGRenderer : Lwjgl3Wrapper by Lwjgl3Loader.load() {
         nvgFill(vg)
     }
 
-    fun dropShadow(x: Float, y: Float, width: Float, height: Float, blur: Float, spread: Float, radius: Float) {
-        nvgRGBA(0, 0, 0, 125, nvgColor)
-        nvgRGBA(0, 0, 0, 0, nvgColor2)
+    fun dropShadow(x: Float, y: Float, width: Float, height: Float, blur: Float, spread: Float, shadowColor: Color, radius: Float) {
+        val r = shadowColor.red.toByte()
+        val g = shadowColor.green.toByte()
+        val b = shadowColor.blue.toByte()
 
-        nvgBoxGradient(vg, x - spread, y - spread, width + 2 * spread, height + 2 * spread, radius + spread, blur, nvgColor, nvgColor2, nvgPaint)
+        nvgRGBA(r, g, b, 125, nvgColor)
+        nvgRGBA(r, g, b, 0, nvgColor2)
+
+        nvgBoxGradient(
+            vg,
+            x - spread,
+            y - spread,
+            width + 2 * spread,
+            height + 2 * spread,
+            radius + spread,
+            blur,
+            nvgColor,
+            nvgColor2,
+            nvgPaint
+        )
         nvgBeginPath(vg)
-        nvgRoundedRect(vg, x - spread - blur, y - spread - blur, width + 2 * spread + 2 * blur, height + 2 * spread + 2 * blur, radius + spread)
+        nvgRoundedRect(
+            vg,
+            x - spread - blur,
+            y - spread - blur,
+            width + 2 * spread + 2 * blur,
+            height + 2 * spread + 2 * blur,
+            radius + spread
+        )
         nvgRoundedRect(vg, x, y, width, height, radius)
-        // nvgPathWinding(vg, NVG_HOLE)
+        nvgPathWinding(vg, NVG_HOLE)
         nvgFillPaint(vg, nvgPaint)
         nvgFill(vg)
     }
