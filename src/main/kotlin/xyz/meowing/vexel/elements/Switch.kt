@@ -129,4 +129,16 @@ class Switch(
     fun trackPressedColor(color: Int): Switch = apply {
         trackPressedColor = color
     }
+
+    fun borderThickness(thickness: Float): Switch = apply {
+        track.borderThickness = thickness
+    }
+
+    fun borderColor(color: Int): Switch = apply {
+        track.borderColor = color
+    }
+
+    fun borderRadius(radius: Float): Switch = apply {
+        track.borderRadius = radius
+    }
 }

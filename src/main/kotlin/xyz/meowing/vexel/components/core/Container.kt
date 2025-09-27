@@ -239,10 +239,10 @@ open class Container(
             val oldY = child.yConstraint
             try {
                 if (!child.isFloating) {
-                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels) {
+                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels && child.xPositionConstraint != Pos.ParentPercent) {
                         child.xConstraint += padding[3]
                     }
-                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels) {
+                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels && child.yPositionConstraint != Pos.ParentPercent) {
                         child.yConstraint += padding[0]
                     }
                 }
