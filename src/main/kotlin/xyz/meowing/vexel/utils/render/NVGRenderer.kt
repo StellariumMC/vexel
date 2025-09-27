@@ -224,9 +224,13 @@ object NVGRenderer {
         NanoVG.nvgFill(vg)
     }
 
-    fun dropShadow(x: Float, y: Float, width: Float, height: Float, blur: Float, spread: Float, radius: Float) {
-        NanoVG.nvgRGBA(0, 0, 0, 125, nvgColor)
-        NanoVG.nvgRGBA(0, 0, 0, 0, nvgColor2)
+    fun dropShadow(x: Float, y: Float, width: Float, height: Float, blur: Float, spread: Float, shadowColor: Color, radius: Float) {
+        val r = shadowColor.red.toByte()
+        val g = shadowColor.green.toByte()
+        val b = shadowColor.blue.toByte()
+
+        NanoVG.nvgRGBA(r, g, b, 125, nvgColor)
+        NanoVG.nvgRGBA(r, g, b, 0, nvgColor2)
 
         NanoVG.nvgBoxGradient(
             vg,

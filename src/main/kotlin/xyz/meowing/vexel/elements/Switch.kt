@@ -63,7 +63,7 @@ class Switch(
             true
         }
     }
-    
+
     fun setEnabled(value: Boolean, animated: Boolean = true, silent: Boolean = false): Switch {
         enabled = value
         
@@ -100,6 +100,18 @@ class Switch(
         track.isHovered = hovered
         track.isPressed = pressed
         updateTrackColor()
+    }
+
+    fun borderThickness(thickness: Float): Switch = apply {
+        track.borderThickness = thickness
+    }
+
+    fun borderColor(color: Int): Switch = apply {
+        track.borderColor = color
+    }
+
+    fun borderRadius(radius: Float): Switch = apply {
+        track.borderRadius = radius
     }
     
     fun thumbColor(color: Int): Switch = apply {

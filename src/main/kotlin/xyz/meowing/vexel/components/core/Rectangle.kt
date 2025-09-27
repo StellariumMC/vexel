@@ -10,6 +10,8 @@ import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.render.NVGRenderer
 import xyz.meowing.vexel.utils.style.Gradient
+import java.awt.Color
+import kotlin.math.roundToInt
 
 open class Rectangle(
     var backgroundColor: Int = 0x80000000.toInt(),
@@ -23,11 +25,16 @@ open class Rectangle(
     heightType: Size = Size.Auto,
     var scrollable: Boolean = false
 ) : VexelElement<Rectangle>(widthType, heightType) {
-    var secondBorderColor: Int = borderColor
+    var secondBorderColor: Int = -1
+    var secondBackgroundColor: Int = -1
     var gradientType: Gradient = Gradient.TopLeftToBottomRight
     var scrollOffset: Float = 0f
     var dropShadow: Boolean = false
     var rotation: Float = 0f
+
+    var shadowBlur = 30f
+    var shadowSpread = 1f
+    var shadowColor = 0x80000000.toInt()
 
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
@@ -52,15 +59,19 @@ open class Rectangle(
         }
 
         if (dropShadow) {
-            NVGRenderer.dropShadow(x, y, width, height, 30f, 1f, borderRadius)
+            NVGRenderer.dropShadow(x, y, width, height, shadowBlur, shadowSpread, Color(shadowColor), borderRadius)
         }
 
         if (currentBgColor != 0) {
-            NVGRenderer.rect(x, y, width, height, currentBgColor, borderRadius)
+            if(currentBgColor == backgroundColor && secondBackgroundColor != -1) {
+                NVGRenderer.gradientRect(x, y, width, height, backgroundColor, secondBackgroundColor, gradientType, borderRadius)
+            } else {
+                NVGRenderer.rect(x, y, width, height, currentBgColor, borderRadius)
+            }
         }
 
         if (borderThickness > 0f) {
-            if (borderColor != secondBorderColor) {
+            if (secondBorderColor != -1) {
                 NVGRenderer.hollowGradientRect(x, y, width, height, borderThickness, borderColor, secondBorderColor, gradientType, borderRadius)
             } else {
                 NVGRenderer.hollowRect(x, y, width, height, borderThickness, borderColor, borderRadius)
@@ -78,7 +89,7 @@ open class Rectangle(
         val contentHeight = getContentHeight()
         val viewHeight = height - padding[0] - padding[2]
 
-        if (contentHeight <= viewHeight) return
+        if (contentHeight.roundToInt() <= viewHeight.roundToInt()) return
 
         val scrollbarWidth = 6f
         val scrollbarX = x + width - padding[1] - scrollbarWidth
@@ -93,7 +104,7 @@ open class Rectangle(
 
         val contentHeight = getContentHeight()
         val viewHeight = height - padding[0] - padding[2]
-        if (contentHeight <= viewHeight) return false
+        if (contentHeight.roundToInt() <= viewHeight.roundToInt()) return false
 
         val scrollbarWidth = 6f
         val scrollbarX = x + width - padding[1] - scrollbarWidth
@@ -316,8 +327,8 @@ open class Rectangle(
             val oldY = child.yConstraint
             try {
                 if (!child.isFloating) {
-                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels) child.xConstraint += padding[3]
-                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels) child.yConstraint += padding[0]
+                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels && child.xPositionConstraint != Pos.ParentPercent) child.xConstraint += padding[3]
+                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels && child.yPositionConstraint != Pos.ParentPercent) child.yConstraint += padding[0]
                 }
                 child.render(mouseX, mouseY)
             } finally {
@@ -339,8 +350,11 @@ open class Rectangle(
         return this
     }
 
-    fun dropShadow(): Rectangle = apply {
+    fun dropShadow(shadowBlur: Float=30f, shadowSpread: Float=1f, shadowColor: Int =0x000000): Rectangle = apply {
         dropShadow = true
+        this.shadowBlur = shadowBlur
+        this.shadowSpread = shadowSpread
+        this.shadowColor = shadowColor
     }
 
     open fun getScreenX(): Float = x
@@ -373,6 +387,12 @@ open class Rectangle(
 
     open fun backgroundColor(color: Int): Rectangle = apply {
         backgroundColor = color
+        secondBackgroundColor = -1
+    }
+
+    open fun setBackgroundGradientColor(color1: Int, color2: Int): Rectangle = apply {
+        backgroundColor = color1
+        secondBackgroundColor = color2
     }
 
     open fun setGradientBorderColor(color1: Int, color2: Int): Rectangle = apply {
@@ -382,7 +402,7 @@ open class Rectangle(
 
     open fun borderColor(color: Int): Rectangle = apply {
         borderColor = color
-        secondBorderColor = color
+        secondBorderColor = -1
     }
 
     open fun borderGradient(type: Gradient): Rectangle = apply {
