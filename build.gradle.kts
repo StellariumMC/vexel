@@ -57,16 +57,54 @@ java {
     withJavadocJar()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            groupId = "xyz.beta"
-            artifactId = "vexel-${mcData}"
-            version = "113"
+afterEvaluate {
+    publishing {
+        publications {
+            named<MavenPublication>("mavenJava") {
+                pom {
+                    name.set("Vexel")
+                    description.set("A simple declarative rendering library built with lwjgl's NanoVG Renderer")
+                    url.set("https://github.com/meowing-xyz/vexel")
+                    licenses {
+                        license {
+                            name.set("GNU General Public License v3.0")
+                            url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("aurielyn")
+                            name.set("Aurielyn")
+                        }
+                        developer {
+                            id.set("mrfast")
+                            name.set("MrFast")
+                        }
+                    }
+                    scm {
+                        url.set("https://github.com/meowing-xyz/vexel")
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "Bundle"
+                url = uri(layout.buildDirectory.dir("central-bundle"))
+            }
         }
     }
-    repositories {
-        mavenLocal()
-    }
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
+
+tasks.register<Zip>("sonatypeBundle") {
+    group = "publishing"
+    from(layout.buildDirectory.dir("central-bundle"))
+    archiveFileName.set("sonatype-bundle.zip")
+    destinationDirectory.set(layout.buildDirectory)
+    dependsOn("publishMavenJavaPublicationToBundleRepository")
 }
