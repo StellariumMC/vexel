@@ -1,33 +1,26 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.text.Text
-import xyz.meowing.vexel.events.EventBus
-import xyz.meowing.vexel.events.GuiEvent
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiScreen
+import org.lwjgl.input.Mouse
+import xyz.meowing.vexel.utils.MouseUtils
 
-abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
+abstract class VexelScreen : GuiScreen() {
+    private var lastX: Int = -1
+    private var lastY: Int = -1
+
     var initialized = false
         private set
     var hasInitialized = false
         private set
 
     val window = VexelWindow()
-    val eventCalls = mutableListOf<EventBus.EventCall>()
-
-    final override fun init() {
-        super.init()
+    final override fun initGui() {
+        super.initGui()
 
         if (!hasInitialized) {
-            eventCalls.add(EventBus.register<GuiEvent.Key>(0, { event ->
-                window.charType(event.key, event.scanCode, event.character)
-            }))
-
             hasInitialized = true
             initialized = true
-
-            window.cleanup()
 
             afterInitialization()
         } else {
@@ -37,40 +30,48 @@ abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
 
     open fun afterInitialization() {}
 
-    override fun render(drawContext: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         window.draw()
+
+        if (MouseUtils.rawX != lastX || MouseUtils.rawY != lastY) {
+            window.mouseMove()
+            lastX = MouseUtils.rawX
+            lastY = MouseUtils.rawY
+        }
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        window.mouseClick(button)
-        return super.mouseClicked(mouseX, mouseY, button)
+    override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
+        window.mouseClick(mouseButton)
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        window.mouseRelease(button)
-        return super.mouseReleased(mouseX, mouseY, button)
+    override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
+        window.mouseRelease(Mouse.getEventButton())
     }
 
-    override fun mouseMoved(mouseX: Double, mouseY: Double) {
-        window.mouseMove()
-        super.mouseMoved(mouseX, mouseY)
+    override fun handleMouseInput() {
+        val dWheel = Mouse.getEventDWheel()
+
+        if (dWheel != 0) {
+            val verticalScroll = if (dWheel > 0) 1.0 else -1.0
+            window.mouseScroll(0.0, verticalScroll)
+        }
+
+        super.handleMouseInput()
     }
 
-    override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        window.mouseScroll(horizontalAmount, verticalAmount)
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
+    override fun keyTyped(typedChar: Char, keyCode: Int) {
+        // scanCode isn't used in 1.8.9 anyway
+        window.charType(keyCode, keyCode, typedChar)
     }
 
-    override fun close() {
+    override fun onGuiClosed() {
         window.cleanup()
-        eventCalls.forEach { it.unregister() }
-        eventCalls.clear()
         hasInitialized = false
-        super.close()
+        super.onGuiClosed()
     }
 
-    override fun resize(client: MinecraftClient, width: Int, height: Int) {
-        super.resize(client, width, height)
+    override fun onResize(mcIn: Minecraft?, w: Int, h: Int) {
+        super.onResize(mcIn, w, h)
         window.onWindowResize()
     }
 }

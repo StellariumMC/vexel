@@ -1,7 +1,6 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.util.Window
-import xyz.meowing.vexel.Vexel
+import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.MouseUtils
@@ -9,7 +8,6 @@ import xyz.meowing.vexel.utils.render.NVGRenderer
 
 class VexelWindow {
     val children: MutableList<VexelElement<*>> = mutableListOf()
-    val window: Window get() = Vexel.mc.window
 
     fun addChild(element: VexelElement<*>) {
         element.parent = this
@@ -22,7 +20,7 @@ class VexelWindow {
     }
 
     fun draw() {
-        NVGRenderer.beginFrame(window.width.toFloat(), window.height.toFloat())
+        NVGRenderer.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
         NVGRenderer.push()
         children.forEach { it.render(0f, 0f) }
         AnimationManager.update()

@@ -1,6 +1,5 @@
 package xyz.meowing.vexel.components.base
 
-import net.minecraft.client.util.Window
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.core.VexelWindow
 import xyz.meowing.vexel.animations.EasingType
@@ -58,9 +57,8 @@ abstract class VexelElement<T : VexelElement<T>>(
     var ignoreFocus: Boolean = false
     var requiresFocus: Boolean = false
 
-    val window: Window get() = mc.window
-    val screenWidth: Int get() = window.width
-    val screenHeight: Int get() = window.height
+    val screenWidth: Int get() = mc.displayWidth
+    val screenHeight: Int get() = mc.displayHeight
 
     var parent: Any? = null
     var tooltipElement: Tooltip? = null

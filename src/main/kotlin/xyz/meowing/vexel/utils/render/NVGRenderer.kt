@@ -1,21 +1,10 @@
 package xyz.meowing.vexel.utils.render
 
-import com.mojang.blaze3d.opengl.GlConst
-import com.mojang.blaze3d.opengl.GlStateManager
-import com.mojang.blaze3d.systems.RenderSystem
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.Framebuffer
-import net.minecraft.client.gl.GlBackend
-import net.minecraft.client.texture.GlTexture
-import net.minecraft.util.Identifier
-import org.lwjgl.nanovg.*
-import org.lwjgl.opengl.GL11.glPopAttrib
-import org.lwjgl.opengl.GL30
-import org.lwjgl.stb.STBImage
-import org.lwjgl.system.MemoryUtil
-import xyz.meowing.vexel.Vexel
-import xyz.meowing.vexel.Vexel.mc
-import xyz.meowing.vexel.mixins.AccessorGlResourceManager
+import me.odin.lwjgl.Lwjgl3Loader
+import me.odin.lwjgl.Lwjgl3Wrapper
+import me.odin.lwjgl.Lwjgl3Wrapper.*
+import me.odin.lwjgl.NanoVGColorWrapper
+import me.odin.lwjgl.NanoVGPaintWrapper
 import xyz.meowing.vexel.utils.style.Color.Companion.alpha
 import xyz.meowing.vexel.utils.style.Color.Companion.blue
 import xyz.meowing.vexel.utils.style.Color.Companion.green
@@ -23,6 +12,10 @@ import xyz.meowing.vexel.utils.style.Color.Companion.red
 import xyz.meowing.vexel.utils.style.Font
 import xyz.meowing.vexel.utils.style.Gradient
 import xyz.meowing.vexel.utils.style.Image
+import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.util.ResourceLocation
+import org.lwjgl.opengl.GL11
+import xyz.meowing.vexel.Vexel.mc
 import java.awt.Color
 import java.nio.ByteBuffer
 import kotlin.math.max
@@ -32,17 +25,23 @@ import kotlin.math.round
 /**
  * Implementation adapted from Odin by odtheking
  * Original work: https://github.com/odtheking/Odin
- * Modified to support Vexel
+ * Modified to support Zen
  *
  * @author Odin Contributors
  */
-object NVGRenderer {
-    private val nvgPaint = NVGPaint.malloc()
-    private val nvgColor = NVGColor.malloc()
-    private val nvgColor2: NVGColor = NVGColor.malloc()
+object NVGRenderer : Lwjgl3Wrapper by Lwjgl3Loader.load() {
+    private val nvgColor: NanoVGColorWrapper = createColor()
+    private val nvgColor2: NanoVGColorWrapper = createColor()
+    private val nvgPaint: NanoVGPaintWrapper = createPaint()
 
-    val defaultFont =
-        Font("Default", mc.resourceManager.getResource(Identifier.of("vexel:font.ttf")).get().inputStream)
+    val defaultFont = getInputStream()
+
+    private fun getInputStream(): Font {
+        try {
+            return Font("Default", mc.resourceManager.getResource(ResourceLocation("zen:font.ttf")).inputStream)
+        } catch (_: Exception) { }
+        return Font("Default", "/assets/zen/font.ttf")
+    }
 
     private val fontMap = HashMap<Font, NVGFont>()
     private val fontBounds = FloatArray(4)
@@ -52,65 +51,51 @@ object NVGRenderer {
 
     private var scissor: Scissor? = null
 
-    private var previousProgram = -1
-
     private var vg = -1L
 
     private var drawing: Boolean = false
 
     init {
-        vg = NanoVGGL3.nvgCreate(NanoVGGL3.NVG_ANTIALIAS or NanoVGGL3.NVG_STENCIL_STROKES)
+        vg = nvgCreate(NVG_ANTIALIAS or NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
     }
 
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        previousProgram =
-            ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as AccessorGlResourceManager).currentProgram().glRef
+        GlStateManager.pushMatrix()
+        if (!mc.framebuffer.isStencilEnabled) mc.framebuffer.enableStencil()
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+        GlStateManager.disableAlpha()
 
-        val framebuffer = mc.framebuffer ?: return
-
-        if (vg == -1L || framebuffer.colorAttachment == null) return
-
-        val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
-            (RenderSystem.getDevice() as GlBackend).framebufferManager,
-            null
-        )
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
-        GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
-        GlStateManager._activeTexture(GL30.GL_TEXTURE0)
-
-        NanoVG.nvgBeginFrame(vg, width, height, 1f)
-        NanoVG.nvgTextAlign(vg, NanoVG.NVG_ALIGN_LEFT or NanoVG.NVG_ALIGN_TOP)
+        nvgBeginFrame(vg, width, height, 1f)
+        nvgTextAlign(vg, NVG_ALIGN_LEFT or NVG_ALIGN_TOP)
         drawing = true
     }
 
     fun endFrame() {
         if (!drawing) throw IllegalStateException("[NVGRenderer] Not drawing, but called endFrame")
-        NanoVG.nvgEndFrame(vg)
-        GlStateManager._disableCull() // default states that mc expects
-        GlStateManager._disableDepthTest()
-        GlStateManager._enableBlend()
-        GlStateManager._blendFuncSeparate(770, 771, 1, 0)
-
-        if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
-
+        nvgEndFrame(vg)
+        GlStateManager.enableDepth()
+        GlStateManager.setActiveTexture(33984)
+        GlStateManager.bindTexture(5)
+        GL11.glPopAttrib()
+        GlStateManager.enableAlpha()
+        GlStateManager.popMatrix()
         drawing = false
     }
 
-    fun push() = NanoVG.nvgSave(vg)
+    fun push() = nvgSave(vg)
 
-    fun pop() = NanoVG.nvgRestore(vg)
+    fun pop() = nvgRestore(vg)
 
-    fun scale(x: Float, y: Float) = NanoVG.nvgScale(vg, x, y)
+    fun scale(x: Float, y: Float) = nvgScale(vg, x, y)
 
-    fun translate(x: Float, y: Float) = NanoVG.nvgTranslate(vg, x, y)
+    fun translate(x: Float, y: Float) = nvgTranslate(vg, x, y)
 
-    fun rotate(amount: Float) = NanoVG.nvgRotate(vg, amount)
+    fun rotate(amount: Float) = nvgRotate(vg, amount)
 
-    fun globalAlpha(amount: Float) = NanoVG.nvgGlobalAlpha(vg, amount.coerceIn(0f, 1f))
+    fun globalAlpha(amount: Float) = nvgGlobalAlpha(vg, amount.coerceIn(0f, 1f))
 
     fun pushScissor(x: Float, y: Float, w: Float, h: Float) {
         scissor = Scissor(scissor, x, y, w + x, h + y)
@@ -118,72 +103,64 @@ object NVGRenderer {
     }
 
     fun popScissor() {
-        NanoVG.nvgResetScissor(vg)
+        nvgResetScissor(vg)
         scissor = scissor?.previous
         scissor?.applyScissor()
     }
 
     fun line(x1: Float, y1: Float, x2: Float, y2: Float, thickness: Float, color: Int) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgMoveTo(vg, x1, y1)
-        NanoVG.nvgLineTo(vg, x2, y2)
-        NanoVG.nvgStrokeWidth(vg, thickness)
+        nvgBeginPath(vg)
+        nvgMoveTo(vg, x1, y1)
+        nvgLineTo(vg, x2, y2)
+        nvgStrokeWidth(vg, thickness)
         color(color)
-        NanoVG.nvgStrokeColor(vg, nvgColor)
-        NanoVG.nvgStroke(vg)
+        nvgStrokeColor(vg, nvgColor)
+        nvgStroke(vg)
     }
 
     fun drawHalfRoundedRect(x: Float, y: Float, w: Float, h: Float, color: Int, radius: Float, roundTop: Boolean) {
-        NanoVG.nvgBeginPath(vg)
+        nvgBeginPath(vg)
 
         if (roundTop) {
-            NanoVG.nvgMoveTo(vg, x, y + h)
-            NanoVG.nvgLineTo(vg, x + w, y + h)
-            NanoVG.nvgLineTo(vg, x + w, y + radius)
-            NanoVG.nvgArcTo(vg, x + w, y, x + w - radius, y, radius)
-            NanoVG.nvgLineTo(vg, x + radius, y)
-            NanoVG.nvgArcTo(vg, x, y, x, y + radius, radius)
-            NanoVG.nvgLineTo(vg, x, y + h)
+            nvgMoveTo(vg, x, y + h)
+            nvgLineTo(vg, x + w, y + h)
+            nvgLineTo(vg, x + w, y + radius)
+            nvgArcTo(vg, x + w, y, x + w - radius, y, radius)
+            nvgLineTo(vg, x + radius, y)
+            nvgArcTo(vg, x, y, x, y + radius, radius)
+            nvgLineTo(vg, x, y + h)
         } else {
-            NanoVG.nvgMoveTo(vg, x, y)
-            NanoVG.nvgLineTo(vg, x + w, y)
-            NanoVG.nvgLineTo(vg, x + w, y + h - radius)
-            NanoVG.nvgArcTo(vg, x + w, y + h, x + w - radius, y + h, radius)
-            NanoVG.nvgLineTo(vg, x + radius, y + h)
-            NanoVG.nvgArcTo(vg, x, y + h, x, y + h - radius, radius)
-            NanoVG.nvgLineTo(vg, x, y)
+            nvgMoveTo(vg, x, y)
+            nvgLineTo(vg, x + w, y)
+            nvgLineTo(vg, x + w, y + h - radius)
+            nvgArcTo(vg, x + w, y + h, x + w - radius, y + h, radius)
+            nvgLineTo(vg, x + radius, y + h)
+            nvgArcTo(vg, x, y + h, x, y + h - radius, radius)
+            nvgLineTo(vg, x, y)
         }
 
-        NanoVG.nvgClosePath(vg)
+        nvgClosePath(vg)
         color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgFill(vg)
+        nvgFillColor(vg, nvgColor)
+        nvgFill(vg)
     }
 
-    fun rect(x: Float, y: Float, w: Float, h: Float, color: Int, radius: Float) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+    fun rect(x: Float, y: Float, w: Float, h: Float, color: Int, tr: Float = 0f, tl: Float = tr, br: Float = tr, bl: Float = tr) {
+        nvgBeginPath(vg)
+        nvgRoundedRectVarying(vg, round(x), round(y), round(w), round(h), tr, tl, br, bl)
         color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgFill(vg)
-    }
-
-    fun rect(x: Float, y: Float, w: Float, h: Float, color: Int) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRect(vg, x, y, w, h + .5f)
-        color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgFill(vg)
+        nvgFillColor(vg, nvgColor)
+        nvgFill(vg)
     }
 
     fun hollowRect(x: Float, y: Float, w: Float, h: Float, thickness: Float, color: Int, radius: Float) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(vg, x, y, w, h, radius)
-        NanoVG.nvgStrokeWidth(vg, thickness)
-        NanoVG.nvgPathWinding(vg, NanoVG.NVG_HOLE)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h, radius)
+        nvgStrokeWidth(vg, thickness)
+        nvgPathWinding(vg, NVG_HOLE)
         color(color)
-        NanoVG.nvgStrokeColor(vg, nvgColor)
-        NanoVG.nvgStroke(vg)
+        nvgStrokeColor(vg, nvgColor)
+        nvgStroke(vg)
     }
 
     fun hollowGradientRect(
@@ -197,139 +174,88 @@ object NVGRenderer {
         gradient: Gradient,
         radius: Float
     ) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(vg, x, y, w, h, radius)
-        NanoVG.nvgStrokeWidth(vg, thickness)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h, radius)
+        nvgStrokeWidth(vg, thickness)
 
         // Gradient stroke
         gradient(color1, color2, x, y, w, h, gradient)
-        NanoVG.nvgStrokePaint(vg, nvgPaint)
-        NanoVG.nvgStroke(vg)
+        nvgStrokeColor(vg, nvgColor)
+        nvgStroke(vg)
     }
 
-    fun gradientRect(
-        x: Float,
-        y: Float,
-        w: Float,
-        h: Float,
-        color1: Int,
-        color2: Int,
-        gradient: Gradient,
-        radius: Float
-    ) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(vg, x, y, w, h, radius)
+    fun gradientRect(x: Float, y: Float, w: Float, h: Float, color1: Int, color2: Int, gradient: Gradient, radius: Float) {
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h, radius)
         gradient(color1, color2, x, y, w, h, gradient)
-        NanoVG.nvgFillPaint(vg, nvgPaint)
-        NanoVG.nvgFill(vg)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
     }
 
     fun dropShadow(x: Float, y: Float, width: Float, height: Float, blur: Float, spread: Float, radius: Float) {
-        NanoVG.nvgRGBA(0, 0, 0, 125, nvgColor)
-        NanoVG.nvgRGBA(0, 0, 0, 0, nvgColor2)
+        nvgRGBA(0, 0, 0, 125, nvgColor)
+        nvgRGBA(0, 0, 0, 0, nvgColor2)
 
-        NanoVG.nvgBoxGradient(
-            vg,
-            x - spread,
-            y - spread,
-            width + 2 * spread,
-            height + 2 * spread,
-            radius + spread,
-            blur,
-            nvgColor,
-            nvgColor2,
-            nvgPaint
-        )
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(
-            vg,
-            x - spread - blur,
-            y - spread - blur,
-            width + 2 * spread + 2 * blur,
-            height + 2 * spread + 2 * blur,
-            radius + spread
-        )
-        NanoVG.nvgRoundedRect(vg, x, y, width, height, radius)
-        NanoVG.nvgPathWinding(vg, NanoVG.NVG_HOLE)
-        NanoVG.nvgFillPaint(vg, nvgPaint)
-        NanoVG.nvgFill(vg)
+        nvgBoxGradient(vg, x - spread, y - spread, width + 2 * spread, height + 2 * spread, radius + spread, blur, nvgColor, nvgColor2, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x - spread - blur, y - spread - blur, width + 2 * spread + 2 * blur, height + 2 * spread + 2 * blur, radius + spread)
+        nvgRoundedRect(vg, x, y, width, height, radius)
+        // nvgPathWinding(vg, NVG_HOLE)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
     }
 
     fun circle(x: Float, y: Float, radius: Float, color: Int) {
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgCircle(vg, x, y, radius)
+        nvgBeginPath(vg)
+        nvgCircle(vg, x, y, radius)
         color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgFill(vg)
+        nvgFillColor(vg, nvgColor)
+        nvgFill(vg)
     }
 
-    fun text(text: String, x: Float, y: Float, size: Float, color: Int, font: Font = defaultFont) {
-        NanoVG.nvgFontSize(vg, size)
-        NanoVG.nvgFontFaceId(vg, getFontID(font))
+    fun text(text: String, x: Float, y: Float, size: Float, color: Int, font: Font) {
+        nvgFontSize(vg, size)
+        nvgFontFaceId(vg, getFontID(font))
         color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgText(vg, x, y + .5f, text)
+        nvgFillColor(vg, nvgColor)
+        nvgText(vg, round(x), round(y + 0.5f), text)
     }
 
-    fun textShadow(text: String, x: Float, y: Float, size: Float, color: Int, font: Font = defaultFont) {
-        NanoVG.nvgFontFaceId(vg, getFontID(font))
-        NanoVG.nvgFontSize(vg, size)
+    fun textShadow(text: String, x: Float, y: Float, size: Float, color: Int, font: Font) {
+        nvgFontFaceId(vg, getFontID(font))
+        nvgFontSize(vg, size)
         color(-16777216)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgText(vg, round(x + 3f), round(y + 3f), text)
+        nvgFillColor(vg, nvgColor)
+        nvgText(vg, round(x + 3f), round(y + 3f), text)
 
         color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgText(vg, round(x), round(y), text)
+        nvgFillColor(vg, nvgColor)
+        nvgText(vg, round(x), round(y), text)
     }
 
     fun textWidth(text: String, size: Float, font: Font): Float {
-        NanoVG.nvgFontSize(vg, size)
-        NanoVG.nvgFontFaceId(vg, getFontID(font))
-        return NanoVG.nvgTextBounds(vg, 0f, 0f, text, fontBounds)
+        nvgFontSize(vg, size)
+        nvgFontFaceId(vg, getFontID(font))
+        return nvgTextBounds(vg, 0f, 0f, text, fontBounds)
     }
 
-    fun drawWrappedString(
-        text: String,
-        x: Float,
-        y: Float,
-        w: Float,
-        size: Float,
-        color: Int,
-        font: Font,
-        lineHeight: Float = 1f
-    ) {
-        NanoVG.nvgFontSize(vg, size)
-        NanoVG.nvgFontFaceId(vg, getFontID(font))
-        NanoVG.nvgTextLineHeight(vg, lineHeight)
+    fun drawWrappedString(text: String, x: Float, y: Float, w: Float, size: Float, color: Int, font: Font, lineHeight: Float = 1f) {
+        nvgFontSize(vg, size)
+        nvgFontFaceId(vg, getFontID(font))
+        nvgTextLineHeight(vg, lineHeight)
         color(color)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgTextBox(vg, x, y, w, text)
+        nvgFillColor(vg, nvgColor)
+        nvgTextBox(vg, x, y, w, text)
     }
 
-    fun wrappedTextBounds(
-        text: String,
-        w: Float,
-        size: Float,
-        font: Font,
-        lineHeight: Float = 1f
-    ): FloatArray {
+    fun wrappedTextBounds(text: String, w: Float, size: Float, font: Font, lineHeight: Float = 1f): FloatArray {
         val bounds = FloatArray(4)
-        NanoVG.nvgFontSize(vg, size)
-        NanoVG.nvgFontFaceId(vg, getFontID(font))
-        NanoVG.nvgTextLineHeight(vg, lineHeight)
-        NanoVG.nvgTextBoxBounds(vg, 0f, 0f, w, text, bounds)
+        nvgFontSize(vg, size)
+        nvgFontFaceId(vg, getFontID(font))
+        nvgTextLineHeight(vg, lineHeight)
+        nvgTextBoxBounds(vg, 0f, 0f, w, text, bounds)
         return bounds // [minX, minY, maxX, maxY]
     }
-
-    fun createNVGImage(textureId: Int, textureWidth: Int, textureHeight: Int): Int =
-        NanoVGGL3.nvglCreateImageFromHandle(
-            vg,
-            textureId,
-            textureWidth,
-            textureHeight,
-            NanoVG.NVG_IMAGE_NEAREST or NanoVGGL3.NVG_IMAGE_NODELETE
-        )
 
     fun image(image: Int, textureWidth: Int, textureHeight: Int, subX: Int, subY: Int, subW: Int, subH: Int, x: Float, y: Float, w: Float, h: Float, radius: Float) {
         if (image == -1) return
@@ -344,37 +270,22 @@ object NVGRenderer {
         val ix = x - iw * sx
         val iy = y - ih * sy
 
-        NanoVG.nvgImagePattern(vg, ix, iy, iw, ih, 0f, image, 1f, nvgPaint)
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(vg, x, y, w, h + .5f, radius)
-        NanoVG.nvgFillPaint(vg, nvgPaint)
-        NanoVG.nvgFill(vg)
+        nvgImagePattern(vg, ix, iy, iw, ih, 0f, image, 1f, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRoundedRect(vg, x, y, w, h + .5f, radius)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
     }
 
-    fun image(image: Image, x: Float, y: Float, w: Float, h: Float, radius: Float) {
-        NanoVG.nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRoundedRect(vg, x, y, w, h + .5f, radius)
-        NanoVG.nvgFillPaint(vg, nvgPaint)
-        NanoVG.nvgFill(vg)
-    }
+    fun createNVGImage(textureId: Int, textureWidth: Int, textureHeight: Int): Int =
+        nvglCreateImageFromHandle(vg, textureId, textureWidth, textureHeight, NVG_IMAGE_NEAREST or NVG_IMAGE_NODELETE)
 
-    fun image(image: Image, x: Float, y: Float, w: Float, h: Float) {
-        NanoVG.nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRect(vg, x, y, w, h + .5f)
-        NanoVG.nvgFillPaint(vg, nvgPaint)
-        NanoVG.nvgFill(vg)
-    }
-
-    fun svg(id: String, x: Float, y: Float, w: Float, h: Float, a: Float = 1f) {
-        val nvg = svgCache[id]?.nvg ?: throw IllegalStateException("SVG Image (${id}) doesn't exist")
-
-        NanoVG.nvgImagePattern(vg, x, y, w, h, 0f, nvg, a, nvgPaint)
-        NanoVG.nvgBeginPath(vg)
-        NanoVG.nvgRect(vg, x, y, w, h + .5f)
-        NanoVG.nvgFillPaint(vg, nvgPaint)
-        NanoVG.nvgFill(vg)
+    fun image(image: Image, x: Float, y: Float, w: Float, h: Float, tr: Float = 0f, tl: Float = tr, br: Float = tr, bl: Float = tr) {
+        nvgImagePattern(vg, x, y, w, h, 0f, getImage(image), 1f, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRoundedRectVarying(vg, x, y, w, h + .5f, tr, tl, br, bl)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
     }
 
     // Might have a memory leak if the menu is left and re-entered lots of times with unique ids
@@ -388,29 +299,39 @@ object NVGRenderer {
         return image
     }
 
+    // lowers reference count by 1, if it reaches 0 it gets deleted from mem
+    fun deleteImage(image: Image) {
+        val nvgImage = images[image] ?: return
+        nvgImage.count--
+        if (nvgImage.count == 0) {
+            nvgDeleteImage(vg, nvgImage.nvg)
+            images.remove(image)
+        }
+    }
+
+    fun svg(id: String, x: Float, y: Float, w: Float, h: Float, a: Float = 1f) {
+        val nvg = svgCache[id]?.nvg ?: throw IllegalStateException("SVG Image (${id}) doesn't exist")
+
+        nvgImagePattern(vg, x, y, w, h, 0f, nvg, a, nvgPaint)
+        nvgBeginPath(vg)
+        nvgRect(vg, x, y, w, h + .5f)
+        nvgFillPaint(vg, nvgPaint)
+        nvgFill(vg)
+    }
+
     fun cleanCache() {
         val iter = images.entries.iterator()
         while (iter.hasNext()) {
             val entry = iter.next()
-            NanoVG.nvgDeleteImage(vg, entry.value.nvg)
+            nvgDeleteImage(vg, entry.value.nvg)
             iter.remove()
         }
 
         val svgIter = svgCache.entries.iterator()
         while (svgIter.hasNext()) {
             val entry = svgIter.next()
-            NanoVG.nvgDeleteImage(vg, entry.value.nvg)
+            nvgDeleteImage(vg, entry.value.nvg)
             svgIter.remove()
-        }
-    }
-
-    // lowers reference count by 1, if it reaches 0 it gets deleted from mem
-    fun deleteImage(image: Image) {
-        val nvgImage = images[image] ?: return
-        nvgImage.count--
-        if (nvgImage.count == 0) {
-            NanoVG.nvgDeleteImage(vg, nvgImage.nvg)
-            images.remove(image)
         }
     }
 
@@ -419,27 +340,27 @@ object NVGRenderer {
         val nvgImage = svgCache[id] ?: return
         nvgImage.count--
         if (nvgImage.count == 0) {
-            NanoVG.nvgDeleteImage(vg, nvgImage.nvg)
+            nvgDeleteImage(vg, nvgImage.nvg)
             svgCache.remove(id)
         }
     }
 
     private fun getImage(image: Image): Int {
-        return images[image]?.nvg ?: throw IllegalStateException("Image (${image.identifier}) doesn't exist")
+        return images.getOrPut(image) { NVGImage(0, loadImage(image)) }.nvg
     }
 
     private fun loadImage(image: Image): Int {
         val w = IntArray(1)
         val h = IntArray(1)
         val channels = IntArray(1)
-        val buffer = STBImage.stbi_load_from_memory(
+        val buffer = stbi_load_from_memory(
             image.buffer(),
             w,
             h,
             channels,
             4
         ) ?: throw NullPointerException("Failed to load image: ${image.identifier}")
-        return NanoVG.nvgCreateImageRGBA(vg, w[0], h[0], 0, buffer)
+        return nvgCreateImageRGBA(vg, w[0], h[0], 0, buffer)
     }
 
     private fun loadSVG(image: Image, svgWidth: Int, svgHeight: Int, color: Color): Int {
@@ -448,71 +369,59 @@ object NVGRenderer {
         val hexColor = "#%06X".format(color.rgb and 0xFFFFFF)
         vec = vec.replace("currentColor", hexColor)
 
-        val svg = NanoSVG.nsvgParse(vec, "px", 96f)
+        val svg = nsvgParse(vec, "px", 96f)
             ?: throw IllegalStateException("Failed to parse ${image.identifier}")
 
         val width = if (svgWidth > 0) svgWidth else svg.width().toInt()
         val height = if (svgHeight > 0) svgHeight else svg.height().toInt()
-        val buffer = MemoryUtil.memAlloc(width * height * 4)
+        val buffer = memAlloc(width * height * 4)
 
         try {
-            val rasterizer = NanoSVG.nsvgCreateRasterizer()
-            NanoSVG.nsvgRasterize(rasterizer, svg, 0f, 0f, width.toFloat() / svg.width(), buffer, width, height, width * 4)
-            val nvgImage = NanoVG.nvgCreateImageRGBA(vg, width, height, 0, buffer)
-            NanoSVG.nsvgDeleteRasterizer(rasterizer)
+            val rasterizer = nsvgCreateRasterizer()
+            nsvgRasterize(rasterizer, svg, 0f, 0f, width.toFloat() / svg.width(), buffer, width, height, width * 4)
+            val nvgImage = nvgCreateImageRGBA(vg, width, height, 0, buffer)
+            nsvgDeleteRasterizer(rasterizer)
             return nvgImage
         } finally {
-            NanoSVG.nsvgDelete(svg)
-            MemoryUtil.memFree(buffer)
+            nsvgDelete(svg)
+            buffer.clear()
         }
     }
 
     private fun color(color: Int) {
-        NanoVG.nvgRGBA(color.red.toByte(), color.green.toByte(), color.blue.toByte(), color.alpha.toByte(), nvgColor)
+        nvgRGBA(color.red.toByte(), color.green.toByte(), color.blue.toByte(), color.alpha.toByte(), nvgColor)
     }
 
     private fun color(color1: Int, color2: Int) {
-        NanoVG.nvgRGBA(
-            color1.red.toByte(),
-            color1.green.toByte(),
-            color1.blue.toByte(),
-            color1.alpha.toByte(),
-            nvgColor
-        )
-        NanoVG.nvgRGBA(
-            color2.red.toByte(),
-            color2.green.toByte(),
-            color2.blue.toByte(),
-            color2.alpha.toByte(),
-            nvgColor2
-        )
+        nvgRGBA(color1.red.toByte(), color1.green.toByte(), color1.blue.toByte(), color1.alpha.toByte(), nvgColor)
+        nvgRGBA(color2.red.toByte(), color2.green.toByte(), color2.blue.toByte(), color2.alpha.toByte(), nvgColor2)
     }
 
     private fun gradient(color1: Int, color2: Int, x: Float, y: Float, w: Float, h: Float, direction: Gradient) {
         color(color1, color2)
         when (direction) {
-            Gradient.LeftToRight -> NanoVG.nvgLinearGradient(vg, x, y, x + w, y, nvgColor, nvgColor2, nvgPaint)
-            Gradient.TopToBottom -> NanoVG.nvgLinearGradient(vg, x, y, x, y + h, nvgColor, nvgColor2, nvgPaint)
-            Gradient.TopLeftToBottomRight -> NanoVG.nvgLinearGradient(vg, x, y, x + w, y + h, nvgColor, nvgColor2, nvgPaint)
+            Gradient.LeftToRight -> nvgLinearGradient(vg, x, y, x + w, y, nvgColor, nvgColor2, nvgPaint)
+            Gradient.TopToBottom -> nvgLinearGradient(vg, x, y, x, y + h, nvgColor, nvgColor2, nvgPaint)
+            Gradient.TopLeftToBottomRight -> nvgLinearGradient(vg, x, y, x + w, y + h, nvgColor, nvgColor2, nvgPaint)
         }
     }
 
     private fun getFontID(font: Font): Int {
         return fontMap.getOrPut(font) {
             val buffer = font.buffer()
-            NVGFont(NanoVG.nvgCreateFontMem(vg, font.name, buffer, false), buffer)
+            NVGFont(nvgCreateFontMem(vg, font.name, buffer, 0), buffer)
         }.id
     }
 
     private class Scissor(val previous: Scissor?, val x: Float, val y: Float, val maxX: Float, val maxY: Float) {
         fun applyScissor() {
-            if (previous == null) NanoVG.nvgScissor(vg, x, y, maxX - x, maxY - y)
+            if (previous == null) nvgScissor(vg, x, y, maxX - x, maxY - y)
             else {
                 val x = max(x, previous.x)
                 val y = max(y, previous.y)
                 val width = max(0f, (min(maxX, previous.maxX) - x))
                 val height = max(0f, (min(maxY, previous.maxY) - y))
-                NanoVG.nvgScissor(vg, x, y, width, height)
+                nvgScissor(vg, x, y, width, height)
             }
         }
     }

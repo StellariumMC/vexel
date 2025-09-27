@@ -1,4 +1,5 @@
 import dev.deftu.gradle.utils.includeOrShade
+import org.apache.commons.lang3.SystemUtils
 
 plugins {
     java
@@ -23,14 +24,21 @@ toolkitLoomHelper {
     useMixinRefMap(modData.id)
 }
 
-dependencies {
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${mcData.dependencies.fabric.fabricApiVersion}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
-    modImplementation(includeOrShade("org.lwjgl:lwjgl-nanovg:3.3.3")!!)
-
-    listOf("windows", "linux", "macos", "macos-arm64").forEach { v ->
-        modImplementation(includeOrShade("org.lwjgl:lwjgl-nanovg:3.3.3:natives-$v")!!)
+loom {
+    runConfigs {
+        "client" {
+            property("fml.coreMods.load", "meowing.zen.lwjgl.plugin.LWJGLLoadingPlugin")
+            if (SystemUtils.IS_OS_MAC_OSX) vmArgs.remove("-XstartOnFirstThread")
+        }
+        remove(getByName("server"))
     }
+}
+
+dependencies {
+    implementation(includeOrShade(kotlin("stdlib-jdk8"))!!)
+    implementation(includeOrShade("org.jetbrains.kotlin:kotlin-reflect:1.6.10")!!)
+
+    modImplementation(includeOrShade("com.github.odtheking:odin-lwjgl:68de0d3e0b")!!)
 }
 
 toolkitMavenPublishing {
@@ -38,59 +46,27 @@ toolkitMavenPublishing {
     setupRepositories.set(false)
 }
 
+tasks.withType<Jar> {
+    manifest.attributes.run {
+        this["FMLCorePlugin"] = "xyz.meowing.vexel.lwjgl.plugin.LWJGLLoadingPlugin"
+    }
+}
+
 java {
     withSourcesJar()
     withJavadocJar()
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            named<MavenPublication>("mavenJava") {
-                pom {
-                    name.set("Vexel")
-                    description.set("A simple declarative rendering library built with lwjgl's NanoVG Renderer")
-                    url.set("https://github.com/meowing-xyz/vexel")
-                    licenses {
-                        license {
-                            name.set("GNU General Public License v3.0")
-                            url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set("aurielyn")
-                            name.set("Aurielyn")
-                        }
-                        developer {
-                            id.set("mrfast")
-                            name.set("MrFast")
-                        }
-                    }
-                    scm {
-                        url.set("https://github.com/meowing-xyz/vexel")
-                    }
-                }
-            }
-        }
-        repositories {
-            maven {
-                name = "Bundle"
-                url = uri(layout.buildDirectory.dir("central-bundle"))
-            }
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            groupId = "xyz.beta"
+            artifactId = "vexel-${mcData}"
+            version = "113"
         }
     }
-}
-
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
-}
-
-tasks.register<Zip>("sonatypeBundle") {
-    group = "publishing"
-    from(layout.buildDirectory.dir("central-bundle"))
-    archiveFileName.set("sonatype-bundle.zip")
-    destinationDirectory.set(layout.buildDirectory)
-    dependsOn("publishMavenJavaPublicationToBundleRepository")
+    repositories {
+        mavenLocal()
+    }
 }

@@ -1,7 +1,7 @@
 package xyz.meowing.vexel.elements
 
-import net.minecraft.client.gui.screen.Screen
-import org.lwjgl.glfw.GLFW
+import net.minecraft.client.gui.GuiScreen
+import org.lwjgl.input.Keyboard
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
@@ -102,7 +102,7 @@ class TextInput(
                 when (clickCount) {
                     1 -> {
                         cursorIndex = newCursorIndex
-                        if (!Screen.hasShiftDown()) {
+                        if (!GuiScreen.isShiftKeyDown()) {
                             selectionAnchor = cursorIndex
                         }
                     }
@@ -123,10 +123,10 @@ class TextInput(
         }
 
         onCharType { keyCode, scanCode, char ->
-            val keyHandled = keyCode != GLFW.GLFW_KEY_UNKNOWN && keyTyped(keyCode, scanCode)
-            val charHandled = char != '\u0000' && keyCode == GLFW.GLFW_KEY_UNKNOWN && charTyped(char)
+            val keyHandled = keyTyped(keyCode, scanCode)
+            val charHandled = charTyped(char)
 
-            if(keyHandled || charHandled) return@onCharType true
+            if (keyHandled || charHandled) return@onCharType true
             false
         }
     }
@@ -169,53 +169,50 @@ class TextInput(
     fun keyTyped(keyCode: Int, scanCode: Int): Boolean {
         if (!isFocused) return false
 
-        val ctrlDown = Screen.hasControlDown()
-        val shiftDown = Screen.hasShiftDown()
+        val ctrlDown = GuiScreen.isCtrlKeyDown()
+        val shiftDown = GuiScreen.isShiftKeyDown()
 
-        // Handle navigation / control keys (layout-independent)
         when (keyCode) {
-            GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_ENTER -> {
+            Keyboard.KEY_ESCAPE, Keyboard.KEY_RETURN -> {
                 isFocused = false
                 return true
             }
-            GLFW.GLFW_KEY_BACKSPACE -> {
+            Keyboard.KEY_BACK -> {
                 if (ctrlDown) deletePrevWord()
                 else deleteChar(-1)
                 return true
             }
-            GLFW.GLFW_KEY_DELETE -> {
+            Keyboard.KEY_DELETE -> {
                 if (ctrlDown) deleteNextWord()
                 else deleteChar(1)
                 return true
             }
-            GLFW.GLFW_KEY_LEFT -> {
+            Keyboard.KEY_LEFT -> {
                 if (ctrlDown) moveWord(-1, shiftDown)
                 else moveCaret(-1, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_RIGHT -> {
+            Keyboard.KEY_RIGHT -> {
                 if (ctrlDown) moveWord(1, shiftDown)
                 else moveCaret(1, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_HOME -> {
+            Keyboard.KEY_HOME -> {
                 moveCaretTo(0, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_END -> {
+            Keyboard.KEY_END -> {
                 moveCaretTo(value.length, shiftDown)
                 return true
             }
         }
 
-        // Handle ctrl-based shortcuts using actual key name (layout-aware)
         if (ctrlDown) {
-            val keyName = GLFW.glfwGetKeyName(keyCode, scanCode)?.lowercase()
-            when (keyName) {
-                "a" -> { selectAll(); return true }
-                "c" -> { copySelection(); return true }
-                "v" -> { paste(); return true }
-                "x" -> { cutSelection(); return true }
+            when (keyCode) {
+                Keyboard.KEY_A -> { selectAll(); return true }
+                Keyboard.KEY_C -> { copySelection(); return true }
+                Keyboard.KEY_V -> { paste(); return true }
+                Keyboard.KEY_X -> { cutSelection(); return true }
             }
         }
 
@@ -401,7 +398,7 @@ class TextInput(
 
     private fun copySelection() {
         if (!hasSelection) return
-        mc.keyboard.clipboard = getSelectedText()
+        GuiScreen.setClipboardString(getSelectedText())
     }
 
     private fun cutSelection() {
@@ -411,7 +408,7 @@ class TextInput(
     }
 
     private fun paste() {
-        val clipboardText = mc.keyboard.clipboard
+        val clipboardText = GuiScreen.getClipboardString()
         if (clipboardText.isNotEmpty()) {
             insertText(clipboardText)
         }

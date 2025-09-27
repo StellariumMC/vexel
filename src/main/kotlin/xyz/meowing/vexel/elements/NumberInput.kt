@@ -1,8 +1,7 @@
 package xyz.meowing.vexel.elements
 
-import net.minecraft.client.gui.screen.Screen
-import org.lwjgl.glfw.GLFW
-import xyz.meowing.vexel.Vexel.mc
+import net.minecraft.client.gui.GuiScreen
+import org.lwjgl.input.Keyboard
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
 import xyz.meowing.vexel.components.base.Pos
@@ -117,7 +116,7 @@ class NumberInput(
                 when (clickCount) {
                     1 -> {
                         cursorIndex = newCursorIndex
-                        if (!Screen.hasShiftDown()) {
+                        if (!GuiScreen.isShiftKeyDown()) {
                             selectionAnchor = cursorIndex
                         }
                     }
@@ -137,11 +136,11 @@ class NumberInput(
             true
         }
 
-        onCharType { keyCode, scanCode, char ->
-            val keyHandled = keyCode != GLFW.GLFW_KEY_UNKNOWN && keyTyped(keyCode, scanCode)
-            val charHandled = char != '\u0000' && keyCode == GLFW.GLFW_KEY_UNKNOWN && charTyped(char)
+        onCharType { keyCode, _, char ->
+            val keyHandled = keyTyped(keyCode)
+            val charHandled = charTyped(char)
 
-            if(keyHandled || charHandled) return@onCharType true
+            if (keyHandled || charHandled) return@onCharType true
             false
         }
     }
@@ -181,56 +180,53 @@ class NumberInput(
         }
     }
 
-    fun keyTyped(keyCode: Int, scanCode: Int): Boolean {
+    fun keyTyped(keyCode: Int): Boolean {
         if (!isFocused) return false
 
-        val ctrlDown = Screen.hasControlDown()
-        val shiftDown = Screen.hasShiftDown()
+        val ctrlDown = GuiScreen.isCtrlKeyDown()
+        val shiftDown = GuiScreen.isShiftKeyDown()
 
-        // Handle navigation / control keys (layout-independent)
         when (keyCode) {
-            GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_ENTER -> {
+            Keyboard.KEY_ESCAPE, Keyboard.KEY_RETURN -> {
                 isFocused = false
                 return true
             }
-            GLFW.GLFW_KEY_BACKSPACE -> {
+            Keyboard.KEY_BACK -> {
                 if (ctrlDown) deletePrevWord()
                 else deleteChar(-1)
                 return true
             }
-            GLFW.GLFW_KEY_DELETE -> {
+            Keyboard.KEY_DELETE -> {
                 if (ctrlDown) deleteNextWord()
                 else deleteChar(1)
                 return true
             }
-            GLFW.GLFW_KEY_LEFT -> {
+            Keyboard.KEY_LEFT -> {
                 if (ctrlDown) moveWord(-1, shiftDown)
                 else moveCaret(-1, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_RIGHT -> {
+            Keyboard.KEY_RIGHT -> {
                 if (ctrlDown) moveWord(1, shiftDown)
                 else moveCaret(1, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_HOME -> {
+            Keyboard.KEY_HOME -> {
                 moveCaretTo(0, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_END -> {
+            Keyboard.KEY_END -> {
                 moveCaretTo(stringValue.length, shiftDown)
                 return true
             }
         }
 
-        // Handle ctrl-based shortcuts using actual key name (layout-aware)
         if (ctrlDown) {
-            val keyName = GLFW.glfwGetKeyName(keyCode, scanCode)?.lowercase()
-            when (keyName) {
-                "a" -> { selectAll(); return true }
-                "c" -> { copySelection(); return true }
-                "v" -> { paste(); return true }
-                "x" -> { cutSelection(); return true }
+            when (keyCode) {
+                Keyboard.KEY_A -> { selectAll(); return true }
+                Keyboard.KEY_C -> { copySelection(); return true }
+                Keyboard.KEY_V -> { paste(); return true }
+                Keyboard.KEY_X -> { cutSelection(); return true }
             }
         }
 
@@ -239,9 +235,9 @@ class NumberInput(
 
     fun charTyped(chr: Char): Boolean {
         if (!isFocused || chr.code < 32 || chr == 127.toChar()) return false
-        if(!chr.isDigit() && chr != '.') return false // Only allow digits, decimal point and minus sign
-        if (chr == '.' && stringValue.contains('.')) return false // Only allow one decimal point
-        if (chr == '-' && (cursorIndex != 0 || stringValue.contains('-'))) return false // Only allow minus sign at the start
+        if (!chr.isDigit() && chr != '.') return false
+        if (chr == '.' && stringValue.contains('.')) return false
+        if (chr == '-' && (cursorIndex != 0 || stringValue.contains('-'))) return false
         if (chr == '.' && !allowDecimals) return false
         if (chr == '-' && !allowNegative) return false
 
@@ -422,7 +418,7 @@ class NumberInput(
 
     private fun copySelection() {
         if (!hasSelection) return
-        mc.keyboard.clipboard = getSelectedText()
+        GuiScreen.setClipboardString(getSelectedText())
     }
 
     private fun cutSelection() {
@@ -432,7 +428,7 @@ class NumberInput(
     }
 
     private fun paste() {
-        val clipboardText = mc.keyboard.clipboard
+        val clipboardText = GuiScreen.getClipboardString()
         if (clipboardText.isNotEmpty()) {
             insertText(clipboardText)
         }
