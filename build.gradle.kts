@@ -55,6 +55,15 @@ tasks.withType<Jar> {
 java {
     withSourcesJar()
     withJavadocJar()
+
+    // Force compile for Java 8
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(8)
 }
 
 afterEvaluate {
