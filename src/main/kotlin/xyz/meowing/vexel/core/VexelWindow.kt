@@ -1,5 +1,6 @@
 package xyz.meowing.vexel.core
 
+import org.lwjgl.input.Keyboard
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
@@ -44,8 +45,8 @@ class VexelWindow {
         children.reversed().any { it.handleMouseScroll(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), horizontalDelta, verticalDelta) }
     }
 
-    fun charType(keyCode: Int, scanCode: Int , charTyped: Char) {
-        children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
+    fun charType(keyCode: Int, scanCode: Int , charTyped: Char): Boolean {
+        return children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
     }
 
     fun onWindowResize() {

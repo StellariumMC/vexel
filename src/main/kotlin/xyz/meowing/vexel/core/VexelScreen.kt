@@ -61,13 +61,20 @@ abstract class VexelScreen : GuiScreen() {
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         // scanCode isn't used in 1.8.9 anyway
-        window.charType(keyCode, keyCode, typedChar)
+        val handled = window.charType(keyCode, keyCode, typedChar)
+        if (!handled) {
+            super.keyTyped(typedChar, keyCode)
+        }
     }
 
     override fun onGuiClosed() {
         window.cleanup()
         hasInitialized = false
         super.onGuiClosed()
+    }
+
+    override fun doesGuiPauseGame(): Boolean {
+        return false
     }
 
     override fun onResize(mcIn: Minecraft?, w: Int, h: Int) {
