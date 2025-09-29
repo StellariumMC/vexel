@@ -38,9 +38,9 @@ object NVGRenderer : Lwjgl3Wrapper by Lwjgl3Loader.load() {
 
     private fun getInputStream(): Font {
         try {
-            return Font("Default", mc.resourceManager.getResource(ResourceLocation("zen:font.ttf")).inputStream)
+            return Font("Default", mc.resourceManager.getResource(ResourceLocation("vexel:font.ttf")).inputStream)
         } catch (_: Exception) { }
-        return Font("Default", "/assets/zen/font.ttf")
+        return Font("Default", "/assets/vexel/font.ttf")
     }
 
     private val fontMap = HashMap<Font, NVGFont>()
