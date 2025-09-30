@@ -1,4 +1,4 @@
-package meowing.zen.lwjgl.plugin
+package xyz.meowing.vexel.lwjgl.plugin
 
 import net.minecraft.launchwrapper.IClassTransformer
 import org.objectweb.asm.ClassReader

@@ -27,7 +27,7 @@ toolkitLoomHelper {
 loom {
     runConfigs {
         "client" {
-            property("fml.coreMods.load", "meowing.zen.lwjgl.plugin.LWJGLLoadingPlugin")
+            property("fml.coreMods.load", "meowing.vexel.lwjgl.plugin.LWJGLLoadingPlugin")
             if (SystemUtils.IS_OS_MAC_OSX) vmArgs.remove("-XstartOnFirstThread")
         }
         remove(getByName("server"))

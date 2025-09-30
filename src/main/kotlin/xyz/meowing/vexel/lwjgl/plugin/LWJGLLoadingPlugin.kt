@@ -1,4 +1,4 @@
-package meowing.zen.lwjgl.plugin
+package xyz.meowing.vexel.lwjgl.plugin
 
 import net.minecraft.launchwrapper.Launch
 import net.minecraft.launchwrapper.LaunchClassLoader
