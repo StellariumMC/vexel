@@ -89,7 +89,6 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     fun drawAsRoot() {
-        NVGRenderer.push()
         NVGRenderer.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
         NVGRenderer.push()
         render(MouseUtils.scaledX, MouseUtils.scaledY)
