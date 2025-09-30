@@ -1,19 +1,15 @@
 package xyz.meowing.vexel.utils.render
 
-import com.mojang.blaze3d.opengl.GlConst
 import com.mojang.blaze3d.opengl.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gl.Framebuffer
+import dev.deftu.omnicore.api.client.render.state.OmniRenderStates
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import net.minecraft.util.Identifier
 import org.lwjgl.nanovg.*
-import org.lwjgl.opengl.GL11.glPopAttrib
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
-import xyz.meowing.vexel.Vexel
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.mixins.AccessorGlResourceManager
 import xyz.meowing.vexel.utils.style.Color.Companion.alpha
@@ -66,8 +62,7 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        previousProgram =
-            ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as AccessorGlResourceManager).currentProgram().glRef
+        previousProgram = ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as AccessorGlResourceManager).currentProgram().glRef
 
         val framebuffer = mc.framebuffer ?: return
 
@@ -89,10 +84,16 @@ object NVGRenderer {
     fun endFrame() {
         if (!drawing) throw IllegalStateException("[NVGRenderer] Not drawing, but called endFrame")
         NanoVG.nvgEndFrame(vg)
+
         GlStateManager._disableCull() // default states that mc expects
         GlStateManager._disableDepthTest()
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
+
+        OmniRenderStates.syncBlend()
+        OmniRenderStates.syncDepth()
+        OmniRenderStates.syncCull()
+        OmniRenderStates.syncColorMask()
 
         if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
