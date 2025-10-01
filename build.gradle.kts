@@ -1,5 +1,3 @@
-import dev.deftu.gradle.utils.includeOrShade
-
 plugins {
     java
     kotlin("jvm")
@@ -26,11 +24,11 @@ toolkitLoomHelper {
 dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${mcData.dependencies.fabric.fabricApiVersion}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
-    modImplementation(includeOrShade("org.lwjgl:lwjgl-nanovg:3.3.3")!!)
-    modImplementation(includeOrShade("dev.deftu:omnicore-$mcData:1.0.0-beta.17")!!)
 
+    modApi(shade("dev.deftu:omnicore-$mcData:1.0.0-beta.17")!!)
+    api(shade("org.lwjgl:lwjgl-nanovg:3.3.3")!!)
     listOf("windows", "linux", "macos", "macos-arm64").forEach { v ->
-        modImplementation(includeOrShade("org.lwjgl:lwjgl-nanovg:3.3.3:natives-$v")!!)
+        api(shade("org.lwjgl:lwjgl-nanovg:3.3.3:natives-$v")!!)
     }
 }
 

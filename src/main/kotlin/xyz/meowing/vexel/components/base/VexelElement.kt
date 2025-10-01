@@ -1,5 +1,6 @@
 package xyz.meowing.vexel.components.base
 
+import dev.deftu.omnicore.api.client.input.OmniMouse
 import net.minecraft.client.util.Window
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.animations.AnimationManager
@@ -9,7 +10,6 @@ import xyz.meowing.vexel.animations.fadeIn
 import xyz.meowing.vexel.animations.fadeOut
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Tooltip
-import xyz.meowing.vexel.utils.MouseUtils
 import xyz.meowing.vexel.utils.render.NVGRenderer
 
 enum class Size {
@@ -91,10 +91,9 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     fun drawAsRoot() {
-        NVGRenderer.push()
         NVGRenderer.beginFrame(mc.window.scaledWidth.toFloat(), mc.window.scaledHeight.toFloat())
         NVGRenderer.push()
-        render(MouseUtils.scaledX.toFloat(), MouseUtils.scaledY.toFloat())
+        render(OmniMouse.scaledX.toFloat(), OmniMouse.scaledY.toFloat())
         AnimationManager.update()
         NVGRenderer.pop()
         NVGRenderer.endFrame()
