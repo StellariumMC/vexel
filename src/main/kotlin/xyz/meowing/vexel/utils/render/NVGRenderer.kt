@@ -7,11 +7,12 @@ import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import net.minecraft.util.Identifier
 import org.lwjgl.nanovg.*
+import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
 import xyz.meowing.vexel.Vexel.mc
-import xyz.meowing.vexel.mixins.AccessorGlResourceManager
 import xyz.meowing.vexel.utils.style.Color.Companion.alpha
 import xyz.meowing.vexel.utils.style.Color.Companion.blue
 import xyz.meowing.vexel.utils.style.Color.Companion.green
@@ -62,18 +63,22 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
-        previousProgram = ((RenderSystem.getDevice() as GlBackend).createCommandEncoder() as AccessorGlResourceManager).currentProgram().glRef
+        previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
 
         val framebuffer = mc.framebuffer ?: return
 
         if (vg == -1L || framebuffer.colorAttachment == null) return
 
         val glFramebuffer = (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
+            //#if MC >= 1.21.9
+            //$$ (RenderSystem.getDevice() as GlBackend).bufferManager,
+            //#else
             (RenderSystem.getDevice() as GlBackend).framebufferManager,
+            //#endif
             null
         )
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, glFramebuffer)
-        GlStateManager._viewport(0, 0, framebuffer.viewportWidth, framebuffer.viewportHeight)
+        GlStateManager._viewport(0, 0, framebuffer.textureWidth, framebuffer.textureHeight)
         GlStateManager._activeTexture(GL30.GL_TEXTURE0)
 
         NanoVG.nvgBeginFrame(vg, width, height, 1f)
@@ -95,7 +100,7 @@ object NVGRenderer {
         OmniRenderStates.syncCull()
         OmniRenderStates.syncColorMask()
 
-        if (previousProgram != -1) GlStateManager._glUseProgram(previousProgram) // fixes invalid program errors when using NVG
+        if (previousProgram != -1) GL20.glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
 
         drawing = false

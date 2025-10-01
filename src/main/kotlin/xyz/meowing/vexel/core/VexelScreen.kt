@@ -1,29 +1,24 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.text.Text
-import xyz.meowing.vexel.events.EventBus
-import xyz.meowing.vexel.events.GuiEvent
+import dev.deftu.omnicore.api.client.input.KeyboardModifiers
+import dev.deftu.omnicore.api.client.input.OmniKey
+import dev.deftu.omnicore.api.client.input.OmniMouseButton
+import dev.deftu.omnicore.api.client.render.OmniRenderingContext
+import dev.deftu.omnicore.api.client.screen.KeyPressEvent
+import dev.deftu.omnicore.api.client.screen.OmniScreen
 
-abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
+abstract class VexelScreen : OmniScreen() {
     var initialized = false
         private set
     var hasInitialized = false
         private set
 
     val window = VexelWindow()
-    val eventCalls = mutableListOf<EventBus.EventCall>()
 
-    final override fun init() {
-        super.init()
+    final override fun onInitialize(width: Int, height: Int) {
+        super.onInitialize(width, height)
 
         if (!hasInitialized) {
-            eventCalls.add(EventBus.register<GuiEvent.Key>(0, { event ->
-                window.charType(event.key, event.scanCode, event.character)
-            }))
-
             hasInitialized = true
             initialized = true
 
@@ -37,18 +32,18 @@ abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
 
     open fun afterInitialization() {}
 
-    override fun render(drawContext: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun onRender(ctx: OmniRenderingContext, mouseX: Int, mouseY: Int, tickDelta: Float) {
         window.draw()
     }
 
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        window.mouseClick(button)
-        return super.mouseClicked(mouseX, mouseY, button)
+    override fun onMouseClick(button: OmniMouseButton, x: Double, y: Double, modifiers: KeyboardModifiers): Boolean {
+        window.mouseClick(button.code)
+        return super.onMouseClick(button, x, y, modifiers)
     }
 
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        window.mouseRelease(button)
-        return super.mouseReleased(mouseX, mouseY, button)
+    override fun onMouseRelease(button: OmniMouseButton, x: Double, y: Double, modifiers: KeyboardModifiers): Boolean {
+        window.mouseRelease(button.code)
+        return super.onMouseRelease(button, x, y, modifiers)
     }
 
     override fun mouseMoved(mouseX: Double, mouseY: Double) {
@@ -56,21 +51,24 @@ abstract class VexelScreen : Screen(Text.literal("Vexel Screen")) {
         super.mouseMoved(mouseX, mouseY)
     }
 
-    override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        window.mouseScroll(horizontalAmount, verticalAmount)
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
+    override fun onKeyPress(key: OmniKey, scanCode: Int, typedChar: Char, modifiers: KeyboardModifiers, event: KeyPressEvent): Boolean {
+        window.charType(key.code, scanCode,typedChar)
+        return super.onKeyPress(key, scanCode, typedChar, modifiers, event)
     }
 
-    override fun close() {
+    override fun onMouseScroll(x: Double, y: Double, amount: Double, horizontalAmount: Double): Boolean {
+        window.mouseScroll(horizontalAmount, amount)
+        return super.onMouseScroll(x, y, amount, horizontalAmount)
+    }
+
+    override fun onScreenClose() {
         window.cleanup()
-        eventCalls.forEach { it.unregister() }
-        eventCalls.clear()
         hasInitialized = false
-        super.close()
+        super.onScreenClose()
     }
 
-    override fun resize(client: MinecraftClient, width: Int, height: Int) {
-        super.resize(client, width, height)
+    override fun onResize(width: Int, height: Int) {
+        super.onResize(width, height)
         window.onWindowResize()
     }
 }

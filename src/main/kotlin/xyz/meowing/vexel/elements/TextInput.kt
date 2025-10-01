@@ -1,5 +1,7 @@
 package xyz.meowing.vexel.elements
 
+import dev.deftu.omnicore.api.client.input.OmniKey
+import dev.deftu.omnicore.api.client.input.OmniKeyboard
 import net.minecraft.client.gui.screen.Screen
 import org.lwjgl.glfw.GLFW
 import xyz.meowing.vexel.Vexel.mc
@@ -102,7 +104,7 @@ class TextInput(
                 when (clickCount) {
                     1 -> {
                         cursorIndex = newCursorIndex
-                        if (!Screen.hasShiftDown()) {
+                        if (!OmniKeyboard.isShiftKeyPressed) {
                             selectionAnchor = cursorIndex
                         }
                     }
@@ -169,8 +171,8 @@ class TextInput(
     fun keyTyped(keyCode: Int, scanCode: Int): Boolean {
         if (!isFocused) return false
 
-        val ctrlDown = Screen.hasControlDown()
-        val shiftDown = Screen.hasShiftDown()
+        val ctrlDown = OmniKeyboard.isCtrlKeyPressed
+        val shiftDown = OmniKeyboard.isShiftKeyPressed
 
         // Handle navigation / control keys (layout-independent)
         when (keyCode) {
