@@ -1,11 +1,10 @@
 package xyz.meowing.vexel.core
 
-import org.lwjgl.input.Keyboard
 import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.MouseUtils
-import xyz.meowing.vexel.utils.render.NVGRenderer
 
 class VexelWindow {
     val children: MutableList<VexelElement<*>> = mutableListOf()
@@ -21,12 +20,12 @@ class VexelWindow {
     }
 
     fun draw() {
-        NVGRenderer.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
-        NVGRenderer.push()
+        renderEngine.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
+        renderEngine.push()
         children.forEach { it.render(0f, 0f) }
         AnimationManager.update()
-        NVGRenderer.pop()
-        NVGRenderer.endFrame()
+        renderEngine.pop()
+        renderEngine.endFrame()
     }
 
     fun mouseClick(button: Int) {
@@ -57,6 +56,6 @@ class VexelWindow {
         children.forEach { it.destroy() }
         children.clear()
         AnimationManager.clear()
-        NVGRenderer.cleanCache()
+        renderEngine.cleanCache()
     }
 }

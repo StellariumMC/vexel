@@ -1,13 +1,16 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiScreen
-import org.lwjgl.input.Mouse
-import xyz.meowing.vexel.utils.MouseUtils
+import dev.deftu.omnicore.api.client.input.KeyboardModifiers
+import dev.deftu.omnicore.api.client.input.OmniKey
+import dev.deftu.omnicore.api.client.input.OmniMouse
+import dev.deftu.omnicore.api.client.input.OmniMouseButton
+import dev.deftu.omnicore.api.client.render.OmniRenderingContext
+import dev.deftu.omnicore.api.client.screen.KeyPressEvent
+import dev.deftu.omnicore.api.client.screen.OmniScreen
 
-abstract class VexelScreen : GuiScreen() {
-    private var lastX: Int = -1
-    private var lastY: Int = -1
+abstract class VexelScreen : OmniScreen() {
+    private var lastX: Double = -1.0
+    private var lastY: Double = -1.0
 
     var initialized = false
         private set
@@ -15,12 +18,15 @@ abstract class VexelScreen : GuiScreen() {
         private set
 
     val window = VexelWindow()
-    final override fun initGui() {
-        super.initGui()
+
+    final override fun onInitialize(width: Int, height: Int) {
+        super.onInitialize(width, height)
 
         if (!hasInitialized) {
             hasInitialized = true
             initialized = true
+
+            window.cleanup()
 
             afterInitialization()
         } else {
@@ -30,55 +36,44 @@ abstract class VexelScreen : GuiScreen() {
 
     open fun afterInitialization() {}
 
-    override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
+    override fun onRender(ctx: OmniRenderingContext, mouseX: Int, mouseY: Int, tickDelta: Float) {
         window.draw()
 
-        if (MouseUtils.rawX != lastX || MouseUtils.rawY != lastY) {
+        if (OmniMouse.rawX != lastX || OmniMouse.rawY != lastY) {
             window.mouseMove()
-            lastX = MouseUtils.rawX
-            lastY = MouseUtils.rawY
+            lastX = OmniMouse.rawX
+            lastY = OmniMouse.rawY
         }
     }
 
-    override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        window.mouseClick(mouseButton)
+    override fun onMouseClick(button: OmniMouseButton, x: Double, y: Double, modifiers: KeyboardModifiers): Boolean {
+        window.mouseClick(button.code)
+        return super.onMouseClick(button, x, y, modifiers)
     }
 
-    override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
-        window.mouseRelease(Mouse.getEventButton())
+    override fun onMouseRelease(button: OmniMouseButton, x: Double, y: Double, modifiers: KeyboardModifiers): Boolean {
+        window.mouseRelease(button.code)
+        return super.onMouseRelease(button, x, y, modifiers)
     }
 
-    override fun handleMouseInput() {
-        val dWheel = Mouse.getEventDWheel()
-
-        if (dWheel != 0) {
-            val verticalScroll = if (dWheel > 0) 1.0 else -1.0
-            window.mouseScroll(0.0, verticalScroll)
-        }
-
-        super.handleMouseInput()
+    override fun onKeyPress(key: OmniKey, scanCode: Int, typedChar: Char, modifiers: KeyboardModifiers, event: KeyPressEvent): Boolean {
+        window.charType(key.code, scanCode,typedChar)
+        return super.onKeyPress(key, scanCode, typedChar, modifiers, event)
     }
 
-    override fun keyTyped(typedChar: Char, keyCode: Int) {
-        // scanCode isn't used in 1.8.9 anyway
-        val handled = window.charType(keyCode, keyCode, typedChar)
-        if (!handled) {
-            super.keyTyped(typedChar, keyCode)
-        }
+    override fun onMouseScroll(x: Double, y: Double, amount: Double, horizontalAmount: Double): Boolean {
+        window.mouseScroll(horizontalAmount, amount)
+        return super.onMouseScroll(x, y, amount, horizontalAmount)
     }
 
-    override fun onGuiClosed() {
+    override fun onScreenClose() {
         window.cleanup()
         hasInitialized = false
-        super.onGuiClosed()
+        super.onScreenClose()
     }
 
-    override fun doesGuiPauseGame(): Boolean {
-        return false
-    }
-
-    override fun onResize(mcIn: Minecraft?, w: Int, h: Int) {
-        super.onResize(mcIn, w, h)
+    override fun onResize(width: Int, height: Int) {
+        super.onResize(width, height)
         window.onWindowResize()
     }
 }

@@ -2,13 +2,12 @@ package xyz.meowing.vexel.elements
 
 import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.awt.Color
 import kotlin.math.max
 import kotlin.math.min
@@ -144,8 +143,8 @@ class TextInput(
         if(hasSelection && !shouldShowPlaceholder) {
             val selStartStr = value.substring(0, selectionStart)
             val selEndStr = value.substring(0, selectionEnd)
-            val x1 = scrollOffset + NVGRenderer.textWidth(selStartStr, fontSize, NVGRenderer.defaultFont)
-            val x2 = scrollOffset + NVGRenderer.textWidth(selEndStr, fontSize, NVGRenderer.defaultFont)
+            val x1 = scrollOffset + renderEngine.textWidth(selStartStr, fontSize, renderEngine.defaultFont)
+            val x2 = scrollOffset + renderEngine.textWidth(selEndStr, fontSize, renderEngine.defaultFont)
 
             selectionRectangle.setPositioning(x1, Pos.ParentPixels, 0f, Pos.ParentCenter)
             selectionRectangle.setSizing(x2-x1, Size.Pixels, fontSize, Size.Pixels)
@@ -156,7 +155,7 @@ class TextInput(
 
         caret.height = fontSize
         caret.width = 1f
-        val x = NVGRenderer.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, NVGRenderer.defaultFont) - scrollOffset
+        val x = renderEngine.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, renderEngine.defaultFont) - scrollOffset
         caret.setPositioning(x, Pos.ParentPixels, 0f, Pos.ParentCenter)
         caret.visible = focused && caretVisible && !shouldShowPlaceholder
 
@@ -234,7 +233,7 @@ class TextInput(
         if (absClickX <= 0) return 0
         var currentWidth = 0f
         for (i in value.indices) {
-            val charWidth = NVGRenderer.textWidth(value[i].toString(), fontSize, NVGRenderer.defaultFont)
+            val charWidth = renderEngine.textWidth(value[i].toString(), fontSize, renderEngine.defaultFont)
             if (absClickX < currentWidth + charWidth / 2) {
                 return i
             }
@@ -311,7 +310,7 @@ class TextInput(
             cursorIndex = newCursor.coerceIn(0, this.value.length)
             selectionAnchor = cursorIndex
 
-            val maxScroll = max(0f, NVGRenderer.textWidth(this.value, fontSize, NVGRenderer.defaultFont).toInt() - (width * 2))
+            val maxScroll = max(0f, renderEngine.textWidth(this.value, fontSize, renderEngine.defaultFont).toInt() - (width * 2))
             if (scrollOffset > maxScroll) {
                 scrollOffset = maxScroll
             }
@@ -415,7 +414,7 @@ class TextInput(
     }
 
     private fun ensureCaretVisible() {
-        val caretXAbsolute = NVGRenderer.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, NVGRenderer.defaultFont).toInt()
+        val caretXAbsolute = renderEngine.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, renderEngine.defaultFont).toInt()
         val visibleTextStart = scrollOffset
         val visibleTextEnd = scrollOffset + (width * 2)
 
@@ -425,9 +424,9 @@ class TextInput(
             scrollOffset = caretXAbsolute - (width * 2) + 1
         }
 
-        val maxScrollPossible = max(0f, NVGRenderer.textWidth(value, fontSize, NVGRenderer.defaultFont).toInt() - (width * 2))
+        val maxScrollPossible = max(0f, renderEngine.textWidth(value, fontSize, renderEngine.defaultFont).toInt() - (width * 2))
         scrollOffset = scrollOffset.coerceIn(0f, maxScrollPossible)
-        if (NVGRenderer.textWidth(value, fontSize, NVGRenderer.defaultFont).toInt() <= width * 2) {
+        if (renderEngine.textWidth(value, fontSize, renderEngine.defaultFont).toInt() <= width * 2) {
             scrollOffset = 0f
         }
     }

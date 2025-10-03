@@ -9,13 +9,7 @@ package xyz.meowing.vexel.utils.style
  */
 class Color(hue: Float, saturation: Float, brightness: Float, alpha: Float = 1f) {
     constructor(hsb: FloatArray, alpha: Float = 1f) : this(hsb[0], hsb[1], hsb[2], alpha)
-    constructor(r: Int, g: Int, b: Int, alpha: Float = 1f) : this(
-        java.awt.Color.RGBtoHSB(
-            r,
-            g,
-            b,
-            FloatArray(size = 3)
-        ), alpha)
+    constructor(r: Int, g: Int, b: Int, alpha: Float = 1f) : this(java.awt.Color.RGBtoHSB(r, g, b, FloatArray(size = 3)), alpha)
     constructor(rgba: Int) : this(rgba.red, rgba.green, rgba.blue, alpha = rgba.alpha / 255f)
     constructor(rgba: Int, alpha: Float) : this(rgba.red, rgba.green, rgba.blue, alpha)
     constructor(hex: String) : this(

@@ -1,11 +1,11 @@
 package xyz.meowing.vexel.components.core
 
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.EasingType
 import xyz.meowing.vexel.animations.animateFloat
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.awt.Color
 import java.util.UUID
 
@@ -16,7 +16,7 @@ class SvgImage(
     var color: Color = Color.WHITE
 ) : VexelElement<SvgImage>() {
     var imageId = "${UUID.randomUUID()}"
-    var image = NVGRenderer.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, imageId)
+    var image = renderEngine.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, imageId)
     var rotation: Float = 0f
 
     init {
@@ -38,16 +38,16 @@ class SvgImage(
         val centerY = y + height / 2f
 
         if (rotation != 0f) {
-            NVGRenderer.push()
-            NVGRenderer.translate(centerX, centerY)
-            NVGRenderer.rotate(Math.toRadians(rotation.toDouble()).toFloat())
-            NVGRenderer.translate(-centerX, -centerY)
+            renderEngine.push()
+            renderEngine.translate(centerX, centerY)
+            renderEngine.rotate(Math.toRadians(rotation.toDouble()).toFloat())
+            renderEngine.translate(-centerX, -centerY)
         }
 
-        NVGRenderer.svg(imageId, x, y, startingWidth, startingHeight, color.alpha / 255f)
+        renderEngine.svg(imageId, x, y, startingWidth, startingHeight, color.alpha / 255f)
 
         if (rotation != 0f) {
-            NVGRenderer.pop()
+            renderEngine.pop()
         }
     }
 
@@ -64,6 +64,6 @@ class SvgImage(
     }
 
     private fun reloadImage() {
-        image = NVGRenderer.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, imageId)
+        image = renderEngine.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, imageId)
     }
 }

@@ -1,6 +1,7 @@
 package xyz.meowing.vexel.components.base
 
 import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.core.VexelWindow
 import xyz.meowing.vexel.animations.EasingType
@@ -9,7 +10,6 @@ import xyz.meowing.vexel.animations.fadeOut
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Tooltip
 import xyz.meowing.vexel.utils.MouseUtils
-import xyz.meowing.vexel.utils.render.NVGRenderer
 
 enum class Size {
     Auto,
@@ -89,12 +89,12 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     fun drawAsRoot() {
-        NVGRenderer.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
-        NVGRenderer.push()
+        renderEngine.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
+        renderEngine.push()
         render(MouseUtils.scaledX, MouseUtils.scaledY)
         AnimationManager.update()
-        NVGRenderer.pop()
-        NVGRenderer.endFrame()
+        renderEngine.pop()
+        renderEngine.endFrame()
     }
 
     fun findFirstVisibleParent(): VexelElement<*>? {

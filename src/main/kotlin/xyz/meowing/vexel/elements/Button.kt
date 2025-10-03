@@ -1,12 +1,12 @@
 package xyz.meowing.vexel.elements
 
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.style.Font
-import xyz.meowing.vexel.utils.render.NVGRenderer
 
 class Button(
     var text: String = "",
@@ -14,7 +14,7 @@ class Button(
     var hoverTextColor: Int? = null,
     var pressedTextColor: Int? = null,
     fontSize: Float = 12f,
-    font: Font = NVGRenderer.defaultFont,
+    font: Font = renderEngine.defaultFont,
     shadowEnabled: Boolean = false,
     backgroundColor: Int = 0x80404040.toInt(),
     borderColor: Int = 0xFF606060.toInt(),
