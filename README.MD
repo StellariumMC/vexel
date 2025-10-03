@@ -18,14 +18,26 @@ Add Vexel to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    // For Fabric 1.21.5
-    modImplementation(include("xyz.meowing:vexel-1.21.5-fabric:1.0.3")!!)
+    // For Fabric 1.21.9
+    modImplementation(include("xyz.meowing:vexel-1.21.9-fabric:1.0.5")!!)
     
     // For Fabric 1.21.7
-    modImplementation(include("xyz.meowing:vexel-1.21.7-fabric:1.0.3")!!)
+    modImplementation(include("xyz.meowing:vexel-1.21.7-fabric:1.0.5")!!)
+    
+    // For Fabric 1.21.5
+    modImplementation(include("xyz.meowing:vexel-1.21.5-fabric:1.0.5")!!)
 
     // For Forge 1.8.9
-    shadowImpl("xyz.meowing:vexel-1.8.9-forge:1.0.3")
+    shadowImpl("xyz.meowing:vexel-1.8.9-forge:1.0.5")
+    
+    // ONLY FORGE 1.8.9 - In your ModInitializer class, call Vexel.init() like:
+    class MyMod {
+        @Mod.EventHandler
+        fun init(event: FMLInitializationEvent) {
+            Vexel.init()
+            /* other code */
+        }
+    }
 }
 ```
 
