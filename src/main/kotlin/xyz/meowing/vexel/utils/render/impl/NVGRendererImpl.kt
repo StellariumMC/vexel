@@ -3,7 +3,7 @@ package xyz.meowing.vexel.utils.render.impl
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.client as mc
 import xyz.meowing.vexel.utils.render.api.MemoryApi
 import xyz.meowing.vexel.utils.render.api.NanoVgApi
 import xyz.meowing.vexel.utils.render.api.RenderApi
@@ -19,6 +19,10 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
 
+/**
+ * This code was inspired by OneConfig and PolyUI's NanoVG impl.
+ * Modified code, some parts of it are from OneConfig/PolyUI.
+ */
 class NVGRendererImpl(
     private val nanoVg: NanoVgApi,
     private val stb: StbApi,

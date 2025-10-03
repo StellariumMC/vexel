@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        // Repositories
+        maven("https://maven.deftu.dev/snapshots")
         maven("https://maven.deftu.dev/releases")
         maven("https://maven.fabricmc.net")
         maven("https://maven.architectury.dev/")
@@ -9,13 +9,10 @@ pluginManagement {
         maven("https://server.bbkr.space/artifactory/libs-release/")
         maven("https://jitpack.io/")
 
-        // Snapshots
-        maven("https://maven.deftu.dev/snapshots")
         mavenLocal()
-
-        // Default repositories
-        gradlePluginPortal()
         mavenCentral()
+
+        gradlePluginPortal()
     }
 
     plugins {

@@ -1,6 +1,6 @@
 package xyz.meowing.vexel.components.base
 
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.client as mc
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.core.VexelWindow
@@ -91,7 +91,7 @@ abstract class VexelElement<T : VexelElement<T>>(
     fun drawAsRoot() {
         renderEngine.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
         renderEngine.push()
-        render(MouseUtils.scaledX, MouseUtils.scaledY)
+        render(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat())
         AnimationManager.update()
         renderEngine.pop()
         renderEngine.endFrame()

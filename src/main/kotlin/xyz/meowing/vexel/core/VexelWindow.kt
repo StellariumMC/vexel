@@ -1,6 +1,6 @@
 package xyz.meowing.vexel.core
 
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.client
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
@@ -20,7 +20,7 @@ class VexelWindow {
     }
 
     fun draw() {
-        renderEngine.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
+        renderEngine.beginFrame(client.displayWidth.toFloat(), client.displayHeight.toFloat())
         renderEngine.push()
         children.forEach { it.render(0f, 0f) }
         AnimationManager.update()

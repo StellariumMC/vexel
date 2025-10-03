@@ -5,6 +5,10 @@ import org.lwjgl.system.MemoryUtil
 import xyz.meowing.vexel.utils.render.api.NanoVgApi
 import java.nio.ByteBuffer
 
+/**
+ * This code was inspired by OneConfig and PolyUI's NanoVG impl.
+ * Modified code, some parts of it are from OneConfig/PolyUI.
+ */
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 private typealias JBoolean = java.lang.Boolean
 

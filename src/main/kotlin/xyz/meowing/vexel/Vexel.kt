@@ -10,7 +10,7 @@ import xyz.meowing.vexel.utils.render.api.StbApi
 import xyz.meowing.vexel.utils.render.impl.NVGRendererImpl
 
 object Vexel {
-    val mc = Minecraft.getMinecraft()
+    val client: Minecraft = Minecraft.getMinecraft()
 
     private const val API_PACKAGE = "xyz.meowing.vexel.utils.render.api."
     private const val NANOVG_IMPL = "xyz.meowing.vexel.utils.render.impl.NanoVgImpl"

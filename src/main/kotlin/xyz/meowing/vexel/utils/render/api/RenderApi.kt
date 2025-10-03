@@ -5,6 +5,10 @@ import xyz.meowing.vexel.utils.style.Gradient
 import xyz.meowing.vexel.utils.style.Image
 import java.awt.Color as AwtColor
 
+/**
+ * This code was inspired by OneConfig and PolyUI's NanoVG impl.
+ * Modified code, some parts of it are from OneConfig/PolyUI.
+ */
 interface RenderApi {
     val defaultFont: Font
 
