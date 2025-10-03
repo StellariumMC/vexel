@@ -11,8 +11,6 @@ plugins {
     id("dev.deftu.gradle.tools.publishing.maven")
 }
 
-version = "${mcData.version}+${rootProject.properties["mod.version"]}"
-
 toolkitMultiversion {
     moveBuildsToRootProject.set(true)
 }
@@ -25,7 +23,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${mcData.dependencies.fabric.fabricApiVersion}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
 
-    modApi(shade("dev.deftu:omnicore-$mcData:1.0.0-beta.17")!!)
+    modApi(include("dev.deftu:omnicore-$mcData:1.0.0-beta.17")!!)
     api(shade("org.lwjgl:lwjgl-nanovg:3.3.3")!!)
     listOf("windows", "linux", "macos", "macos-arm64").forEach { v ->
         api(shade("org.lwjgl:lwjgl-nanovg:3.3.3:natives-$v")!!)
