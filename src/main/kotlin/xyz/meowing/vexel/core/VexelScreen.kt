@@ -6,6 +6,7 @@ import dev.deftu.omnicore.api.client.input.OmniMouseButton
 import dev.deftu.omnicore.api.client.render.OmniRenderingContext
 import dev.deftu.omnicore.api.client.screen.KeyPressEvent
 import dev.deftu.omnicore.api.client.screen.OmniScreen
+import xyz.meowing.vexel.utils.render.NVGRenderer
 
 abstract class VexelScreen : OmniScreen() {
     var initialized = false
@@ -22,7 +23,7 @@ abstract class VexelScreen : OmniScreen() {
             hasInitialized = true
             initialized = true
 
-            window.cleanup()
+            NVGRenderer.cleanCache()
 
             afterInitialization()
         } else {
