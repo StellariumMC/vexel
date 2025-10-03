@@ -38,6 +38,13 @@ dependencies {
             /* other code */
         }
     }
+    
+    // It is highly recommended that you use Deftu's Gradle Toolkit but if you use any other GT,
+    // you may also need to add the following to your build script's repositories:
+    repositories {
+        maven("https://maven.deftu.dev/snapshots")
+        maven("https://maven.deftu.dev/releases")
+    }
 }
 ```
 
