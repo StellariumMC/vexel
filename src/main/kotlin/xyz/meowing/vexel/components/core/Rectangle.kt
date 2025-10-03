@@ -1,5 +1,6 @@
 package xyz.meowing.vexel.components.core
 
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.EasingType
 import xyz.meowing.vexel.animations.animateFloat
 import xyz.meowing.vexel.animations.fadeIn
@@ -8,7 +9,6 @@ import xyz.meowing.vexel.core.VexelWindow
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import xyz.meowing.vexel.utils.style.Gradient
 import java.awt.Color
 import kotlin.math.roundToInt
@@ -52,34 +52,34 @@ open class Rectangle(
         val centerY = y + height / 2f
 
         if (rotation != 0f) {
-            NVGRenderer.push()
-            NVGRenderer.translate(centerX, centerY)
-            NVGRenderer.rotate(Math.toRadians(rotation.toDouble()).toFloat())
-            NVGRenderer.translate(-centerX, -centerY)
+            renderEngine.push()
+            renderEngine.translate(centerX, centerY)
+            renderEngine.rotate(Math.toRadians(rotation.toDouble()).toFloat())
+            renderEngine.translate(-centerX, -centerY)
         }
 
         if (dropShadow) {
-            NVGRenderer.dropShadow(x, y, width, height, shadowBlur, shadowSpread, Color(shadowColor), borderRadius)
+            renderEngine.dropShadow(x, y, width, height, shadowBlur, shadowSpread, Color(shadowColor), borderRadius)
         }
 
         if (currentBgColor != 0) {
             if (currentBgColor == backgroundColor && secondBackgroundColor != -1) {
-                NVGRenderer.gradientRect(x, y, width, height, backgroundColor, secondBackgroundColor, gradientType, borderRadius)
+                renderEngine.gradientRect(x, y, width, height, backgroundColor, secondBackgroundColor, gradientType, borderRadius)
             } else {
-                NVGRenderer.rect(x, y, width, height, currentBgColor, borderRadius)
+                renderEngine.rect(x, y, width, height, currentBgColor, borderRadius)
             }
         }
 
         if (borderThickness > 0f) {
             if (secondBorderColor != -1) {
-                NVGRenderer.hollowGradientRect(x, y, width, height, borderThickness, borderColor, secondBorderColor, gradientType, borderRadius)
+                renderEngine.hollowGradientRect(x, y, width, height, borderThickness, borderColor, secondBorderColor, gradientType, borderRadius)
             } else {
-                NVGRenderer.hollowRect(x, y, width, height, borderThickness, borderColor, borderRadius)
+                renderEngine.hollowRect(x, y, width, height, borderThickness, borderColor, borderRadius)
             }
         }
 
         if (rotation != 0f) {
-            NVGRenderer.pop()
+            renderEngine.pop()
         }
     }
 
@@ -96,7 +96,7 @@ open class Rectangle(
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
-        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
+        renderEngine.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
     }
 
     private fun isPointInScrollbar(mouseX: Float, mouseY: Float): Boolean {
@@ -312,14 +312,14 @@ open class Rectangle(
             val viewHeight = height - padding[0] - padding[2]
             val buffer = 2f
 
-            NVGRenderer.push()
-            NVGRenderer.pushScissor(
+            renderEngine.push()
+            renderEngine.pushScissor(
                 contentX - buffer,
                 contentY - buffer,
                 viewWidth + buffer * 2,
                 viewHeight + buffer * 2
             )
-            NVGRenderer.translate(0f, -scrollOffset)
+            renderEngine.translate(0f, -scrollOffset)
         }
 
         children.forEach { child ->
@@ -338,8 +338,8 @@ open class Rectangle(
         }
 
         if (scrollable) {
-            NVGRenderer.popScissor()
-            NVGRenderer.pop()
+            renderEngine.popScissor()
+            renderEngine.pop()
         }
 
         if (isHovered || isDraggingScrollbar) drawScrollbar()

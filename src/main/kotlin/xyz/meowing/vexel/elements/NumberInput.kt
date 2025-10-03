@@ -2,12 +2,12 @@ package xyz.meowing.vexel.elements
 
 import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.awt.Color
 import kotlin.math.max
 import kotlin.math.min
@@ -158,8 +158,8 @@ class NumberInput(
         if(hasSelection && !shouldShowPlaceholder) {
             val selStartStr = stringValue.substring(0, selectionStart)
             val selEndStr = stringValue.substring(0, selectionEnd)
-            val x1 = scrollOffset + NVGRenderer.textWidth(selStartStr, fontSize, NVGRenderer.defaultFont)
-            val x2 = scrollOffset + NVGRenderer.textWidth(selEndStr, fontSize, NVGRenderer.defaultFont)
+            val x1 = scrollOffset + renderEngine.textWidth(selStartStr, fontSize, renderEngine.defaultFont)
+            val x2 = scrollOffset + renderEngine.textWidth(selEndStr, fontSize, renderEngine.defaultFont)
 
             selectionRectangle.setPositioning(x1, Pos.ParentPixels, 0f, Pos.ParentCenter)
             selectionRectangle.setSizing(x2-x1, Size.Pixels, fontSize, Size.Pixels)
@@ -170,7 +170,7 @@ class NumberInput(
 
         caret.height = fontSize
         caret.width = 1f
-        val x = NVGRenderer.textWidth(stringValue.substring(0, cursorIndex.coerceIn(0, stringValue.length)), fontSize, NVGRenderer.defaultFont) - scrollOffset
+        val x = renderEngine.textWidth(stringValue.substring(0, cursorIndex.coerceIn(0, stringValue.length)), fontSize, renderEngine.defaultFont) - scrollOffset
         caret.setPositioning(x, Pos.ParentPixels, 0f, Pos.ParentCenter)
         caret.visible = focused && caretVisible && !shouldShowPlaceholder
 
@@ -254,7 +254,7 @@ class NumberInput(
         if (absClickX <= 0) return 0
         var currentWidth = 0f
         for (i in stringValue.indices) {
-            val charWidth = NVGRenderer.textWidth(stringValue[i].toString(), fontSize, NVGRenderer.defaultFont)
+            val charWidth = renderEngine.textWidth(stringValue[i].toString(), fontSize, renderEngine.defaultFont)
             if (absClickX < currentWidth + charWidth / 2) {
                 return i
             }
@@ -331,7 +331,7 @@ class NumberInput(
             cursorIndex = newCursor.coerceIn(0, this.stringValue.length)
             selectionAnchor = cursorIndex
 
-            val maxScroll = max(0f, NVGRenderer.textWidth(this.stringValue, fontSize, NVGRenderer.defaultFont).toInt() - (width * 2))
+            val maxScroll = max(0f, renderEngine.textWidth(this.stringValue, fontSize, renderEngine.defaultFont).toInt() - (width * 2))
             if (scrollOffset > maxScroll) {
                 scrollOffset = maxScroll
             }
@@ -435,7 +435,7 @@ class NumberInput(
     }
 
     private fun ensureCaretVisible() {
-        val caretXAbsolute = NVGRenderer.textWidth(stringValue.substring(0, cursorIndex.coerceIn(0, stringValue.length)), fontSize, NVGRenderer.defaultFont).toInt()
+        val caretXAbsolute = renderEngine.textWidth(stringValue.substring(0, cursorIndex.coerceIn(0, stringValue.length)), fontSize, renderEngine.defaultFont).toInt()
         val visibleTextStart = scrollOffset
         val visibleTextEnd = scrollOffset + (width * 2)
 
@@ -445,9 +445,9 @@ class NumberInput(
             scrollOffset = caretXAbsolute - (width * 2) + 1
         }
 
-        val maxScrollPossible = max(0f, NVGRenderer.textWidth(stringValue, fontSize, NVGRenderer.defaultFont).toInt() - (width * 2))
+        val maxScrollPossible = max(0f, renderEngine.textWidth(stringValue, fontSize, renderEngine.defaultFont).toInt() - (width * 2))
         scrollOffset = scrollOffset.coerceIn(0f, maxScrollPossible)
-        if (NVGRenderer.textWidth(stringValue, fontSize, NVGRenderer.defaultFont).toInt() <= width * 2) {
+        if (renderEngine.textWidth(stringValue, fontSize, renderEngine.defaultFont).toInt() <= width * 2) {
             scrollOffset = 0f
         }
     }

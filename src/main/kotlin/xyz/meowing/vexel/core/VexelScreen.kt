@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Mouse
 import xyz.meowing.vexel.utils.MouseUtils
 
+@Suppress("UNUSED")
 abstract class VexelScreen : GuiScreen() {
     private var lastX: Int = -1
     private var lastY: Int = -1
@@ -15,6 +16,7 @@ abstract class VexelScreen : GuiScreen() {
         private set
 
     val window = VexelWindow()
+
     final override fun initGui() {
         super.initGui()
 
@@ -42,10 +44,18 @@ abstract class VexelScreen : GuiScreen() {
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         window.mouseClick(mouseButton)
+        super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
         window.mouseRelease(Mouse.getEventButton())
+        super.mouseReleased(mouseX, mouseY, state)
+    }
+
+    override fun keyTyped(typedChar: Char, keyCode: Int) {
+        // scanCode isn't used in 1.8.9 anyway
+        window.charType(keyCode, keyCode,typedChar)
+        super.keyTyped(typedChar, keyCode)
     }
 
     override fun handleMouseInput() {
@@ -55,26 +65,13 @@ abstract class VexelScreen : GuiScreen() {
             val verticalScroll = if (dWheel > 0) 1.0 else -1.0
             window.mouseScroll(0.0, verticalScroll)
         }
-
         super.handleMouseInput()
-    }
-
-    override fun keyTyped(typedChar: Char, keyCode: Int) {
-        // scanCode isn't used in 1.8.9 anyway
-        val handled = window.charType(keyCode, keyCode, typedChar)
-        if (!handled) {
-            super.keyTyped(typedChar, keyCode)
-        }
     }
 
     override fun onGuiClosed() {
         window.cleanup()
         hasInitialized = false
         super.onGuiClosed()
-    }
-
-    override fun doesGuiPauseGame(): Boolean {
-        return false
     }
 
     override fun onResize(mcIn: Minecraft?, w: Int, h: Int) {

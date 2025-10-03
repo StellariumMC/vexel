@@ -1,5 +1,6 @@
 package xyz.meowing.vexel.elements
 
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.EasingType
 import xyz.meowing.vexel.animations.animateFloat
 import xyz.meowing.vexel.animations.fadeIn
@@ -9,7 +10,6 @@ import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.style.Gradient
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -304,20 +304,20 @@ private class ColorPickerPanel(
         override fun onRender(mouseX: Float, mouseY: Float) {
             if (alpha <= 0f) return
 
-            NVGRenderer.globalAlpha(alpha)
+            renderEngine.globalAlpha(alpha)
 
             val hueColor = Color.HSBtoRGB(currentHue, 1f, 1f)
             val whiteColor = 0xFFFFFFFF.toInt()
             val blackColor = 0xFF000000.toInt()
 
-            NVGRenderer.gradientRect(x, y, width, height, whiteColor, hueColor, Gradient.LeftToRight, 0f)
-            NVGRenderer.gradientRect(x, y, width, height + 1f, 0x00000000, blackColor, Gradient.TopToBottom, 0f)
+            renderEngine.gradientRect(x, y, width, height, whiteColor, hueColor, Gradient.LeftToRight, 0f)
+            renderEngine.gradientRect(x, y, width, height + 1f, 0x00000000, blackColor, Gradient.TopToBottom, 0f)
 
             val indicatorX = x + currentSaturation * width - 3f
             val indicatorY = y + (1f - currentBrightness) * height - 3f
-            NVGRenderer.hollowRect(indicatorX, indicatorY, 6f, 6f, 2f, 0xFFFFFFFF.toInt(), 2f)
+            renderEngine.hollowRect(indicatorX, indicatorY, 6f, 6f, 2f, 0xFFFFFFFF.toInt(), 2f)
 
-            NVGRenderer.globalAlpha(1f)
+            renderEngine.globalAlpha(1f)
         }
     }
 
@@ -327,7 +327,7 @@ private class ColorPickerPanel(
         override fun onRender(mouseX: Float, mouseY: Float) {
             if (alpha <= 0f) return
 
-            NVGRenderer.globalAlpha(alpha)
+            renderEngine.globalAlpha(alpha)
 
             val steps = (height / 1f).toInt()
             val stepHeight = height / steps
@@ -338,13 +338,13 @@ private class ColorPickerPanel(
                 val color = Color(rgb)
 
                 val rectY = y + i * stepHeight
-                NVGRenderer.rect(x, rectY, width, stepHeight, color.rgb, 0f)
+                renderEngine.rect(x, rectY, width, stepHeight, color.rgb, 0f)
             }
 
             val indicatorY = y + currentHue * height - 2f
-            NVGRenderer.rect(x - 3f, indicatorY, width + 6f, 4f, 0xFFFFFFFF.toInt(), 3f)
+            renderEngine.rect(x - 3f, indicatorY, width + 6f, 4f, 0xFFFFFFFF.toInt(), 3f)
 
-            NVGRenderer.globalAlpha(1f)
+            renderEngine.globalAlpha(1f)
         }
     }
 
@@ -355,7 +355,7 @@ private class ColorPickerPanel(
         override fun onRender(mouseX: Float, mouseY: Float) {
             if (alpha <= 0f) return
 
-            NVGRenderer.globalAlpha(alpha)
+            renderEngine.globalAlpha(alpha)
 
             val checkerSize = 6f
             val cols = (width / checkerSize).toInt() + 1
@@ -370,7 +370,7 @@ private class ColorPickerPanel(
                     val rectHeight = if (rectY + checkerSize > y + height) y + height - rectY else checkerSize
 
                     if (rectWidth > 0 && rectHeight > 0) {
-                        NVGRenderer.rect(rectX, rectY, rectWidth, rectHeight, checkerColor, 0f)
+                        renderEngine.rect(rectX, rectY, rectWidth, rectHeight, checkerColor, 0f)
                     }
                 }
             }
@@ -378,12 +378,12 @@ private class ColorPickerPanel(
             val opaqueColor = Color(currentColor.red, currentColor.green, currentColor.blue, 255).rgb
             val transparentColor = Color(currentColor.red, currentColor.green, currentColor.blue, 0).rgb
 
-            NVGRenderer.gradientRect(x, y, width, height, opaqueColor, transparentColor, Gradient.TopToBottom, 0f)
+            renderEngine.gradientRect(x, y, width, height, opaqueColor, transparentColor, Gradient.TopToBottom, 0f)
 
             val indicatorY = y + (1f - currentAlpha) * height - 2f
-            NVGRenderer.rect(x - 3f, indicatorY, width + 6f, 4f, 0xFFFFFFFF.toInt(), 2f)
+            renderEngine.rect(x - 3f, indicatorY, width + 6f, 4f, 0xFFFFFFFF.toInt(), 2f)
 
-            NVGRenderer.globalAlpha(1f)
+            renderEngine.globalAlpha(1f)
         }
     }
 }

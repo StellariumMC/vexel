@@ -1,9 +1,9 @@
 package xyz.meowing.vexel.components.core
 
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import xyz.meowing.vexel.utils.style.Font
 
 class Text(
@@ -11,7 +11,7 @@ class Text(
     var textColor: Int = 0xFFFFFFFF.toInt(),
     var fontSize: Float = 12f,
     var shadowEnabled: Boolean = false,
-    var font: Font = NVGRenderer.defaultFont
+    var font: Font = renderEngine.defaultFont
 ) : VexelElement<Text>() {
 
     init {
@@ -23,11 +23,11 @@ class Text(
     override fun onRender(mouseX: Float, mouseY: Float) {
         if (text.isEmpty()) return
 
-        if (shadowEnabled) NVGRenderer.textShadow(text, x, y, fontSize, textColor, font)
-        else NVGRenderer.text(text, x, y, fontSize, textColor, font)
+        if (shadowEnabled) renderEngine.textShadow(text, x, y, fontSize, textColor, font)
+        else renderEngine.text(text, x, y, fontSize, textColor, font)
     }
 
-    override fun getAutoWidth(): Float = NVGRenderer.textWidth(text, fontSize, font)
+    override fun getAutoWidth(): Float = renderEngine.textWidth(text, fontSize, font)
 
     override fun getAutoHeight(): Float = fontSize
 

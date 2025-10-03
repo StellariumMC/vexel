@@ -1,6 +1,3 @@
-import dev.deftu.gradle.utils.includeOrShade
-import org.apache.commons.lang3.SystemUtils
-
 plugins {
     java
     kotlin("jvm")
@@ -14,8 +11,6 @@ plugins {
     id("dev.deftu.gradle.tools.publishing.maven")
 }
 
-version = "${mcData.version}+${rootProject.properties["mod.version"]}"
-
 toolkitMultiversion {
     moveBuildsToRootProject.set(true)
 }
@@ -24,21 +19,17 @@ toolkitLoomHelper {
     useMixinRefMap(modData.id)
 }
 
-loom {
-    runConfigs {
-        "client" {
-            property("fml.coreMods.load", "xyz.meowing.vexel.lwjgl.plugin.LWJGLLoadingPlugin")
-            if (SystemUtils.IS_OS_MAC_OSX) vmArgs.remove("-XstartOnFirstThread")
-        }
-        remove(getByName("server"))
-    }
-}
-
 dependencies {
-    implementation(includeOrShade(kotlin("stdlib-jdk8"))!!)
-    implementation(includeOrShade("org.jetbrains.kotlin:kotlin-reflect:1.6.10")!!)
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
 
-    modImplementation(includeOrShade("com.github.odtheking:odin-lwjgl:68de0d3e0b")!!)
+    api("org.lwjgl:lwjgl-nanovg:3.3.3")
+    api("org.lwjgl:lwjgl-stb:3.3.3")
+    api(shade("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
+        exclude(group = "org.apache")
+        exclude(group = "org.intellij")
+        exclude(group = "org.jetbrains")
+    })
 }
 
 toolkitMavenPublishing {
@@ -46,17 +37,10 @@ toolkitMavenPublishing {
     setupRepositories.set(false)
 }
 
-tasks.withType<Jar> {
-    manifest.attributes.run {
-        this["FMLCorePlugin"] = "xyz.meowing.vexel.lwjgl.plugin.LWJGLLoadingPlugin"
-    }
-}
-
 java {
     withSourcesJar()
     withJavadocJar()
 
-    // Force compile for Java 8
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
     }

@@ -2,7 +2,7 @@ package xyz.meowing.vexel.utils
 
 import net.minecraft.client.gui.ScaledResolution
 import org.lwjgl.input.Mouse
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.vexel.Vexel.client as mc
 
 object MouseUtils {
     inline val sr get() = ScaledResolution(mc)
