@@ -16,20 +16,22 @@ Have questions? Join our [discord!](https://discord.gg/QHFWnydFXr)
 
 Add Vexel to your `build.gradle.kts`:
 
+It is recommended that you use Deftu's Gradle Toolkit, visit [this page](https://github.com/StellariumMC/Forge1.8.9Template) for a Forge 1.8.9 Template.
+
 ```kotlin
 dependencies {
     // For Fabric 1.21.9
-    modImplementation(include("xyz.meowing:vexel-1.21.9-fabric:1.0.5")!!)
-    
+    modImplementation(include("xyz.meowing:vexel-1.21.9-fabric:1.0.6")!!)
+
     // For Fabric 1.21.7
-    modImplementation(include("xyz.meowing:vexel-1.21.7-fabric:1.0.5")!!)
-    
+    modImplementation(include("xyz.meowing:vexel-1.21.7-fabric:1.0.6")!!)
+
     // For Fabric 1.21.5
-    modImplementation(include("xyz.meowing:vexel-1.21.5-fabric:1.0.5")!!)
+    modImplementation(include("xyz.meowing:vexel-1.21.5-fabric:1.0.6")!!)
 
     // For Forge 1.8.9
-    shadowImpl("xyz.meowing:vexel-1.8.9-forge:1.0.5")
-    
+    shadowImpl("xyz.meowing:vexel-1.8.9-forge:1.0.6")
+
     // ONLY FORGE 1.8.9 - In your ModInitializer class, call Vexel.init() like:
     class MyMod {
         @Mod.EventHandler
@@ -38,7 +40,7 @@ dependencies {
             /* other code */
         }
     }
-    
+
     // It is highly recommended that you use Deftu's Gradle Toolkit but if you use any other GT,
     // you may also need to add the following to your build script's repositories:
     repositories {
