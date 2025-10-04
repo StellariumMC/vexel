@@ -1,59 +1,97 @@
 plugins {
+    idea
     java
-    kotlin("jvm")
-    id("dev.deftu.gradle.multiversion")
-    id("dev.deftu.gradle.tools")
-    id("dev.deftu.gradle.tools.resources")
-    id("dev.deftu.gradle.tools.bloom")
-    id("dev.deftu.gradle.tools.shadow")
-    id("dev.deftu.gradle.tools.minecraft.loom")
-    id("dev.deftu.gradle.tools.minecraft.releases")
-    id("dev.deftu.gradle.tools.publishing.maven")
-}
-
-toolkitMultiversion {
-    moveBuildsToRootProject.set(true)
-}
-
-toolkitLoomHelper {
-    useMixinRefMap(modData.id)
-}
-
-dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
-
-    api("org.lwjgl:lwjgl-nanovg:3.3.3")
-    api("org.lwjgl:lwjgl-stb:3.3.3")
-    api(shade("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
-        exclude(group = "org.apache")
-        exclude(group = "org.intellij")
-        exclude(group = "org.jetbrains")
-    })
-}
-
-toolkitMavenPublishing {
-    artifactName.set("vexel")
-    setupRepositories.set(false)
+    signing
+    `maven-publish`
+    id("gg.essential.loom") version "0.10.0.+"
+    id("dev.architectury.architectury-pack200") version "0.1.3"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("jvm") version "2.0.0"
 }
 
 java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
     withSourcesJar()
     withJavadocJar()
+}
 
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+loom {
+    forge {
+        pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
     }
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.release.set(8)
+tasks.compileJava {
+    dependsOn(tasks.processResources)
 }
+
+sourceSets.main {
+    output.setResourcesDir(sourceSets.main.flatMap { it.java.classesDirectory })
+    java.srcDir(layout.projectDirectory.dir("src/main/kotlin"))
+    kotlin.destinationDirectory.set(java.destinationDirectory)
+}
+
+repositories {
+    mavenCentral()
+    maven("https://maven.deftu.dev/snapshots")
+    maven("https://maven.deftu.dev/releases")
+}
+
+val shadowImpl: Configuration by configurations.creating {
+    configurations.implementation.get().extendsFrom(this)
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:1.8.9")
+    mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
+    forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
+
+    implementation(kotlin("stdlib-jdk8"))
+
+    api("org.lwjgl:lwjgl-nanovg:3.3.3")
+    api("org.lwjgl:lwjgl-stb:3.3.3")
+    shadowImpl("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
+        exclude(group = "org.apache")
+        exclude(group = "org.intellij")
+        exclude(group = "org.jetbrains")
+    }
+}
+
+tasks.withType(JavaCompile::class) {
+    options.encoding = "UTF-8"
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("dev")
+    configurations = listOf(shadowImpl)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+val remapJar by tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
+    archiveClassifier.set("")
+    dependsOn(tasks.shadowJar)
+    from(zipTree(tasks.shadowJar.get().archiveFile))
+}
+
+tasks.jar {
+    archiveClassifier.set("thin")
+    destinationDirectory.set(layout.buildDirectory.dir("devlibs"))
+}
+
+tasks.assemble.get().dependsOn(tasks.remapJar)
 
 afterEvaluate {
     publishing {
         publications {
-            named<MavenPublication>("mavenJava") {
+            create<MavenPublication>("mavenJava") {
+                artifactId = "vexel-1.8.9-forge"
+                groupId = project.properties["mod.group"] as String
+                version = project.properties["mod.version"] as String
+
+                artifact(tasks.remapJar.get().archiveFile)
+                artifact(tasks["sourcesJar"])
+                artifact(tasks["javadocJar"])
+
                 pom {
                     name.set("Vexel")
                     description.set("A simple declarative rendering library built with lwjgl's NanoVG Renderer")
