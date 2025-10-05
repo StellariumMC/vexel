@@ -1,3 +1,5 @@
+import dev.deftu.gradle.utils.version.MinecraftVersions
+
 plugins {
     java
     kotlin("jvm")
@@ -23,10 +25,12 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${mcData.dependencies.fabric.fabricApiVersion}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
 
-    modApi(include("dev.deftu:omnicore-$mcData:1.0.0-beta.17")!!)
-    api(shade("org.lwjgl:lwjgl-nanovg:3.3.3")!!)
+    modApi(include("xyz.meowing:knit-${mcData}:101")!!)
+
+    val lwjglVersion = if (mcData.version <= MinecraftVersions.VERSION_1_20_1) "3.3.1" else "3.3.3"
+    api(shade("org.lwjgl:lwjgl-nanovg:$lwjglVersion")!!)
     listOf("windows", "linux", "macos", "macos-arm64").forEach { v ->
-        api(shade("org.lwjgl:lwjgl-nanovg:3.3.3:natives-$v")!!)
+        api(shade("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-$v")!!)
     }
 }
 

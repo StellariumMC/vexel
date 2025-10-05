@@ -1,7 +1,7 @@
 package xyz.meowing.vexel.core
 
-import dev.deftu.omnicore.api.client.input.OmniMouse
 import net.minecraft.client.util.Window
+import xyz.meowing.knit.api.input.KnitMouse
 import xyz.meowing.vexel.Vexel
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
@@ -24,26 +24,26 @@ class VexelWindow {
     fun draw() {
         NVGRenderer.beginFrame(window.width.toFloat(), window.height.toFloat())
         NVGRenderer.push()
-        children.forEach { it.render(0f, 0f) }
+        children.forEach { it.render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
         AnimationManager.update()
         NVGRenderer.pop()
         NVGRenderer.endFrame()
     }
 
     fun mouseClick(button: Int) {
-        children.reversed().any { it.handleMouseClick(OmniMouse.rawX.toFloat(), OmniMouse.rawY.toFloat(), button) }
+        children.reversed().any { it.handleMouseClick(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
     fun mouseRelease(button: Int) {
-        children.reversed().forEach { it.handleMouseRelease(OmniMouse.rawX.toFloat(), OmniMouse.rawY.toFloat(), button) }
+        children.reversed().forEach { it.handleMouseRelease(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
     fun mouseMove() {
-        children.reversed().any { it.handleMouseMove(OmniMouse.rawX.toFloat(), OmniMouse.rawY.toFloat()) }
+        children.reversed().any { it.handleMouseMove(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
     }
 
     fun mouseScroll(horizontalDelta: Double, verticalDelta: Double) {
-        children.reversed().any { it.handleMouseScroll(OmniMouse.rawX.toFloat(), OmniMouse.rawY.toFloat(), horizontalDelta, verticalDelta) }
+        children.reversed().any { it.handleMouseScroll(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), horizontalDelta, verticalDelta) }
     }
 
     fun charType(keyCode: Int, scanCode: Int , charTyped: Char) {

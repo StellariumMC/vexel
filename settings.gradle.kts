@@ -2,6 +2,7 @@ pluginManagement {
     repositories {
         // Repositories
         maven("https://maven.deftu.dev/releases")
+        maven("https://maven.deftu.dev/snapshots")
         maven("https://maven.fabricmc.net")
         maven("https://maven.architectury.dev/")
         maven("https://maven.minecraftforge.net")
@@ -9,13 +10,10 @@ pluginManagement {
         maven("https://server.bbkr.space/artifactory/libs-release/")
         maven("https://jitpack.io/")
 
-        // Snapshots
-        maven("https://maven.deftu.dev/snapshots")
+        mavenCentral()
         mavenLocal()
 
-        // Default repositories
         gradlePluginPortal()
-        mavenCentral()
     }
 
     plugins {
@@ -30,6 +28,8 @@ rootProject.name = projectName
 rootProject.buildFileName = "root.gradle.kts"
 
 listOf(
+    "1.20.1-fabric",
+
     "1.21.5-fabric",
     "1.21.7-fabric",
     "1.21.9-fabric"

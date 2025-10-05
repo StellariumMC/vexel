@@ -1,7 +1,7 @@
 package xyz.meowing.vexel.components.base
 
-import dev.deftu.omnicore.api.client.input.OmniMouse
 import net.minecraft.client.util.Window
+import xyz.meowing.knit.api.input.KnitMouse
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.core.VexelWindow
@@ -143,7 +143,7 @@ abstract class VexelElement<T : VexelElement<T>>(
     fun drawAsRoot() {
         NVGRenderer.beginFrame(mc.window.scaledWidth.toFloat(), mc.window.scaledHeight.toFloat())
         NVGRenderer.push()
-        render(OmniMouse.scaledX.toFloat(), OmniMouse.scaledY.toFloat())
+        render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat())
         AnimationManager.update()
         NVGRenderer.pop()
         NVGRenderer.endFrame()
