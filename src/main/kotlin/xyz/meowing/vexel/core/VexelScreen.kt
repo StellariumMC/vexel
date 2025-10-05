@@ -3,7 +3,7 @@ package xyz.meowing.vexel.core
 import xyz.meowing.knit.api.screen.KnitScreen
 import xyz.meowing.vexel.utils.render.NVGRenderer
 
-abstract class VexelScreen : KnitScreen() {
+abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(screenName) {
     var initialized = false
         private set
     var hasInitialized = false
