@@ -1,10 +1,10 @@
 package xyz.meowing.vexel.core
 
-import xyz.meowing.vexel.Vexel.client
-import xyz.meowing.vexel.Vexel.renderEngine
+import xyz.meowing.knit.api.input.KnitMouse
+import xyz.meowing.knit.api.render.KnitResolution
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.MouseUtils
+import xyz.meowing.vexel.Vexel.renderEngine
 
 class VexelWindow {
     val children: MutableList<VexelElement<*>> = mutableListOf()
@@ -20,32 +20,32 @@ class VexelWindow {
     }
 
     fun draw() {
-        renderEngine.beginFrame(client.displayWidth.toFloat(), client.displayHeight.toFloat())
+        renderEngine.beginFrame(KnitResolution.Window.width.toFloat(), KnitResolution.Window.height.toFloat())
         renderEngine.push()
-        children.forEach { it.render(0f, 0f) }
+        children.forEach { it.render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
         AnimationManager.update()
         renderEngine.pop()
         renderEngine.endFrame()
     }
 
     fun mouseClick(button: Int) {
-        children.reversed().any { it.handleMouseClick(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), button) }
+        children.reversed().any { it.handleMouseClick(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
     fun mouseRelease(button: Int) {
-        children.reversed().forEach { it.handleMouseRelease(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), button) }
+        children.reversed().forEach { it.handleMouseRelease(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
     fun mouseMove() {
-        children.reversed().any { it.handleMouseMove(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat()) }
+        children.reversed().any { it.handleMouseMove(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
     }
 
     fun mouseScroll(horizontalDelta: Double, verticalDelta: Double) {
-        children.reversed().any { it.handleMouseScroll(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat(), horizontalDelta, verticalDelta) }
+        children.reversed().any { it.handleMouseScroll(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), horizontalDelta, verticalDelta) }
     }
 
-    fun charType(keyCode: Int, scanCode: Int , charTyped: Char): Boolean {
-        return children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
+    fun charType(keyCode: Int, scanCode: Int , charTyped: Char) {
+        children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
     }
 
     fun onWindowResize() {

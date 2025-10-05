@@ -1,5 +1,6 @@
 package xyz.meowing.vexel.components.base
 
+import xyz.meowing.knit.api.input.KnitMouse
 import xyz.meowing.vexel.Vexel.client as mc
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
@@ -9,7 +10,6 @@ import xyz.meowing.vexel.animations.fadeIn
 import xyz.meowing.vexel.animations.fadeOut
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Tooltip
-import xyz.meowing.vexel.utils.MouseUtils
 
 abstract class VexelElement<T : VexelElement<T>>(
     var widthType: Size = Size.Pixels,
@@ -141,7 +141,7 @@ abstract class VexelElement<T : VexelElement<T>>(
     fun drawAsRoot() {
         renderEngine.beginFrame(mc.displayWidth.toFloat(), mc.displayHeight.toFloat())
         renderEngine.push()
-        render(MouseUtils.rawX.toFloat(), MouseUtils.rawY.toFloat())
+        render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat())
         AnimationManager.update()
         renderEngine.pop()
         renderEngine.endFrame()
