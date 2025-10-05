@@ -33,6 +33,7 @@ sourceSets.main {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     maven("https://maven.deftu.dev/snapshots")
     maven("https://maven.deftu.dev/releases")
 }
@@ -47,6 +48,8 @@ dependencies {
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
     implementation(kotlin("stdlib-jdk8"))
+
+    compileOnly("com.github.odtheking:odin-lwjgl:68de0d3e0b")
 
     api("org.lwjgl:lwjgl-nanovg:3.3.3")
     api("org.lwjgl:lwjgl-stb:3.3.3")
