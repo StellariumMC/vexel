@@ -49,11 +49,11 @@ abstract class VexelElement<T : VexelElement<T>>(
             invalidateChildrenSizes()
         }
 
-    val sf get() = KnitResolution.scaleFactor.toFloat()
-    val left: Float get() = x / sf
-    val top: Float get() = y / sf
-    val right: Float get() = (x + width) / sf
-    val bottom: Float get() = (y + height) / sf
+    val scaleFactor get() = KnitResolution.scaleFactor.toFloat()
+    val left: Float get() = x / scaleFactor
+    val top: Float get() = y / scaleFactor
+    val right: Float get() = (x + width) / scaleFactor
+    val bottom: Float get() = (y + height) / scaleFactor
 
     var widthPercent: Float = 100f
     var heightPercent: Float = 100f
