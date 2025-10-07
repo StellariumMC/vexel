@@ -2,6 +2,7 @@ package xyz.meowing.vexel.components.base
 
 import net.minecraft.client.gui.ScaledResolution
 import xyz.meowing.knit.api.input.KnitMouse
+import xyz.meowing.knit.api.render.KnitResolution
 import xyz.meowing.vexel.Vexel.client as mc
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
@@ -48,7 +49,7 @@ abstract class VexelElement<T : VexelElement<T>>(
             invalidateChildrenSizes()
         }
 
-    val sf = ScaledResolution(mc).scaleFactor
+    val sf = KnitResolution.scaleFactor.toFloat()
     val left: Float get() = x / sf
     val top: Float get() = y / sf
     val right: Float get() = (x + width) / sf
