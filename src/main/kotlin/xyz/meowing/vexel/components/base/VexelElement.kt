@@ -1,6 +1,5 @@
 package xyz.meowing.vexel.components.base
 
-import net.minecraft.client.gui.ScaledResolution
 import xyz.meowing.knit.api.input.KnitMouse
 import xyz.meowing.knit.api.render.KnitResolution
 import xyz.meowing.vexel.Vexel.client as mc
