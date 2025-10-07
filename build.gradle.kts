@@ -15,13 +15,10 @@ toolkitMultiversion {
     moveBuildsToRootProject.set(true)
 }
 
-toolkitLoomHelper {
-    useMixinRefMap(modData.id)
-}
-
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
+
+    compileOnly("com.github.odtheking:odin-lwjgl:68de0d3e0b")
 
     api("org.lwjgl:lwjgl-nanovg:3.3.3")
     api("org.lwjgl:lwjgl-stb:3.3.3")
@@ -30,6 +27,7 @@ dependencies {
         exclude(group = "org.intellij")
         exclude(group = "org.jetbrains")
     })
+    modApi(shade("xyz.meowing:knit-${mcData}:102")!!)
 }
 
 toolkitMavenPublishing {
