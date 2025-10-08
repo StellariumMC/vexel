@@ -26,8 +26,7 @@ import kotlin.math.round
 class NVGRendererImpl(
     private val nanoVg: NanoVgApi,
     private val stb: StbApi,
-    private val memory: MemoryApi,
-    private val isOdin: Boolean = false
+    private val memory: MemoryApi
 ) : RenderApi {
 
     private data class NVGImage(var count: Int, val nvg: Int)
@@ -366,7 +365,7 @@ class NVGRendererImpl(
             return nanoVg.createImageRGBA(width, height, 0, buffer)
         } finally {
             nanoVg.svgDelete(svgAddress)
-            if (isOdin) buffer.clear() else memory.memFree(buffer)
+            memory.memFree(buffer)
         }
     }
 
