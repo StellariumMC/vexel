@@ -1,7 +1,8 @@
 package xyz.meowing.vexel.elements
 
-import org.lwjgl.glfw.GLFW
+import xyz.meowing.knit.api.input.KnitInputs
 import xyz.meowing.knit.api.input.KnitKeyboard
+import xyz.meowing.knit.api.input.KnitKeys
 import xyz.meowing.vexel.Vexel.mc
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
@@ -123,11 +124,7 @@ class TextInput(
         }
 
         onCharType { keyCode, scanCode, char ->
-            val keyHandled = keyCode != GLFW.GLFW_KEY_UNKNOWN && keyTyped(keyCode, scanCode)
-            val charHandled = char != '\u0000' && keyCode == GLFW.GLFW_KEY_UNKNOWN && charTyped(char)
-
-            if(keyHandled || charHandled) return@onCharType true
-            false
+            keyTyped(keyCode, scanCode, char)
         }
     }
 
@@ -166,66 +163,72 @@ class TextInput(
         }
     }
 
-    fun keyTyped(keyCode: Int, scanCode: Int): Boolean {
+    fun keyTyped(keyCode: Int, scanCode: Int, char: Char): Boolean {
         if (!isFocused) return false
 
         val ctrlDown = KnitKeyboard.isCtrlKeyPressed
         val shiftDown = KnitKeyboard.isShiftKeyPressed
 
-        // Handle navigation / control keys (layout-independent)
         when (keyCode) {
-            GLFW.GLFW_KEY_ESCAPE, GLFW.GLFW_KEY_ENTER -> {
+            KnitKeys.KEY_ESCAPE.code, KnitKeys.KEY_ENTER.code -> {
                 isFocused = false
                 return true
             }
-            GLFW.GLFW_KEY_BACKSPACE -> {
-                if (ctrlDown) deletePrevWord()
-                else deleteChar(-1)
+            KnitKeys.KEY_BACKSPACE.code -> {
+                if (ctrlDown) deletePrevWord() else deleteChar(-1)
                 return true
             }
-            GLFW.GLFW_KEY_DELETE -> {
-                if (ctrlDown) deleteNextWord()
-                else deleteChar(1)
+            KnitKeys.KEY_DELETE.code -> {
+                if (ctrlDown) deleteNextWord() else deleteChar(1)
                 return true
             }
-            GLFW.GLFW_KEY_LEFT -> {
-                if (ctrlDown) moveWord(-1, shiftDown)
-                else moveCaret(-1, shiftDown)
+            KnitKeys.KEY_LEFT.code -> {
+                if (ctrlDown) moveWord(-1, shiftDown) else moveCaret(-1, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_RIGHT -> {
-                if (ctrlDown) moveWord(1, shiftDown)
-                else moveCaret(1, shiftDown)
+            KnitKeys.KEY_RIGHT.code -> {
+                if (ctrlDown) moveWord(1, shiftDown) else moveCaret(1, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_HOME -> {
+            KnitKeys.KEY_HOME.code -> {
                 moveCaretTo(0, shiftDown)
                 return true
             }
-            GLFW.GLFW_KEY_END -> {
+            KnitKeys.KEY_END.code -> {
                 moveCaretTo(value.length, shiftDown)
                 return true
             }
         }
 
-        // Handle ctrl-based shortcuts using actual key name (layout-aware)
         if (ctrlDown) {
-            val keyName = GLFW.glfwGetKeyName(keyCode, scanCode)?.lowercase()
+            val keyName = KnitInputs.getDisplayName(keyCode, scanCode).substringAfterLast(".").lowercase()
             when (keyName) {
-                "a" -> { selectAll(); return true }
-                "c" -> { copySelection(); return true }
-                "v" -> { paste(); return true }
-                "x" -> { cutSelection(); return true }
+                "a" -> {
+                    selectAll()
+                    return true
+                }
+                "c" -> {
+                    copySelection()
+                    return true
+                }
+                "v" -> {
+                    paste()
+                    return true
+                }
+                "x" -> {
+                    cutSelection()
+                    return true
+                }
             }
+            return false
+        }
+
+        if (char.code >= 32 && char != 127.toChar()) {
+            insertText(char.toString())
+            return true
         }
 
         return false
-    }
-
-    fun charTyped(chr: Char): Boolean {
-        if (!isFocused || chr.code < 32 || chr == 127.toChar()) return false
-        insertText(chr.toString())
-        return true
     }
 
     private fun resetCaretBlink() {
