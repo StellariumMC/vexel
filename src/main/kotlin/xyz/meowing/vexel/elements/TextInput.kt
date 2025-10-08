@@ -2,6 +2,9 @@ package xyz.meowing.vexel.elements
 
 import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
+import xyz.meowing.knit.api.input.KnitInputs
+import xyz.meowing.knit.api.input.KnitKeyboard
+import xyz.meowing.knit.api.input.KnitKeys
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
@@ -122,11 +125,7 @@ class TextInput(
         }
 
         onCharType { keyCode, scanCode, char ->
-            val keyHandled = keyTyped(keyCode, scanCode)
-            val charHandled = charTyped(char)
-
-            if (keyHandled || charHandled) return@onCharType true
-            false
+            keyTyped(keyCode, scanCode, char)
         }
     }
 
@@ -165,54 +164,69 @@ class TextInput(
         }
     }
 
-    fun keyTyped(keyCode: Int, scanCode: Int): Boolean {
+    fun keyTyped(keyCode: Int, scanCode: Int, char: Char): Boolean {
         if (!isFocused) return false
 
-        val ctrlDown = GuiScreen.isCtrlKeyDown()
-        val shiftDown = GuiScreen.isShiftKeyDown()
+        val ctrlDown = KnitKeyboard.isCtrlKeyPressed
+        val shiftDown = KnitKeyboard.isShiftKeyPressed
 
         when (keyCode) {
-            Keyboard.KEY_ESCAPE, Keyboard.KEY_RETURN -> {
+            KnitKeys.KEY_ESCAPE.code, KnitKeys.KEY_ENTER.code -> {
                 isFocused = false
                 return true
             }
-            Keyboard.KEY_BACK -> {
-                if (ctrlDown) deletePrevWord()
-                else deleteChar(-1)
+            KnitKeys.KEY_BACKSPACE.code -> {
+                if (ctrlDown) deletePrevWord() else deleteChar(-1)
                 return true
             }
-            Keyboard.KEY_DELETE -> {
-                if (ctrlDown) deleteNextWord()
-                else deleteChar(1)
+            KnitKeys.KEY_DELETE.code -> {
+                if (ctrlDown) deleteNextWord() else deleteChar(1)
                 return true
             }
-            Keyboard.KEY_LEFT -> {
-                if (ctrlDown) moveWord(-1, shiftDown)
-                else moveCaret(-1, shiftDown)
+            KnitKeys.KEY_LEFT.code -> {
+                if (ctrlDown) moveWord(-1, shiftDown) else moveCaret(-1, shiftDown)
                 return true
             }
-            Keyboard.KEY_RIGHT -> {
-                if (ctrlDown) moveWord(1, shiftDown)
-                else moveCaret(1, shiftDown)
+            KnitKeys.KEY_RIGHT.code -> {
+                if (ctrlDown) moveWord(1, shiftDown) else moveCaret(1, shiftDown)
                 return true
             }
-            Keyboard.KEY_HOME -> {
+            KnitKeys.KEY_HOME.code -> {
                 moveCaretTo(0, shiftDown)
                 return true
             }
-            Keyboard.KEY_END -> {
+            KnitKeys.KEY_END.code -> {
                 moveCaretTo(value.length, shiftDown)
                 return true
             }
         }
 
         if (ctrlDown) {
-            when (keyCode) {
-                Keyboard.KEY_A -> { selectAll(); return true }
-                Keyboard.KEY_C -> { copySelection(); return true }
-                Keyboard.KEY_V -> { paste(); return true }
-                Keyboard.KEY_X -> { cutSelection(); return true }
+            val keyName = KnitInputs.getDisplayName(keyCode, scanCode).substringAfterLast(".").lowercase()
+            when (keyName) {
+                "a" -> {
+                    selectAll()
+                    return true
+                }
+                "c" -> {
+                    copySelection()
+                    return true
+                }
+                "v" -> {
+                    paste()
+                    return true
+                }
+                "x" -> {
+                    cutSelection()
+                    return true
+                }
             }
+            return false
+        }
+
+        if (char.code >= 32 && char != 127.toChar()) {
+            insertText(char.toString())
+            return true
         }
 
         return false

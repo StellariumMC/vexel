@@ -2,6 +2,9 @@ package xyz.meowing.vexel.elements
 
 import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
+import xyz.meowing.knit.api.input.KnitInputs
+import xyz.meowing.knit.api.input.KnitKeyboard
+import xyz.meowing.knit.api.input.KnitKeys
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
@@ -136,12 +139,8 @@ class NumberInput(
             true
         }
 
-        onCharType { keyCode, _, char ->
-            val keyHandled = keyTyped(keyCode)
-            val charHandled = charTyped(char)
-
-            if (keyHandled || charHandled) return@onCharType true
-            false
+        onCharType { keyCode, scanCode, char ->
+            keyTyped(keyCode, scanCode, char)
         }
     }
 
@@ -180,68 +179,75 @@ class NumberInput(
         }
     }
 
-    fun keyTyped(keyCode: Int): Boolean {
+    fun keyTyped(keyCode: Int, scanCode: Int, char: Char): Boolean {
         if (!isFocused) return false
 
-        val ctrlDown = GuiScreen.isCtrlKeyDown()
-        val shiftDown = GuiScreen.isShiftKeyDown()
+        val ctrlDown = KnitKeyboard.isCtrlKeyPressed
+        val shiftDown = KnitKeyboard.isShiftKeyPressed
 
         when (keyCode) {
-            Keyboard.KEY_ESCAPE, Keyboard.KEY_RETURN -> {
+            KnitKeys.KEY_ESCAPE.code, KnitKeys.KEY_ENTER.code -> {
                 isFocused = false
                 return true
             }
-            Keyboard.KEY_BACK -> {
-                if (ctrlDown) deletePrevWord()
-                else deleteChar(-1)
+            KnitKeys.KEY_BACKSPACE.code -> {
+                if (ctrlDown) deletePrevWord() else deleteChar(-1)
                 return true
             }
-            Keyboard.KEY_DELETE -> {
-                if (ctrlDown) deleteNextWord()
-                else deleteChar(1)
+            KnitKeys.KEY_DELETE.code -> {
+                if (ctrlDown) deleteNextWord() else deleteChar(1)
                 return true
             }
-            Keyboard.KEY_LEFT -> {
-                if (ctrlDown) moveWord(-1, shiftDown)
-                else moveCaret(-1, shiftDown)
+            KnitKeys.KEY_LEFT.code -> {
+                if (ctrlDown) moveWord(-1, shiftDown) else moveCaret(-1, shiftDown)
                 return true
             }
-            Keyboard.KEY_RIGHT -> {
-                if (ctrlDown) moveWord(1, shiftDown)
-                else moveCaret(1, shiftDown)
+            KnitKeys.KEY_RIGHT.code -> {
+                if (ctrlDown) moveWord(1, shiftDown) else moveCaret(1, shiftDown)
                 return true
             }
-            Keyboard.KEY_HOME -> {
+            KnitKeys.KEY_HOME.code -> {
                 moveCaretTo(0, shiftDown)
                 return true
             }
-            Keyboard.KEY_END -> {
+            KnitKeys.KEY_END.code -> {
                 moveCaretTo(stringValue.length, shiftDown)
                 return true
             }
         }
 
         if (ctrlDown) {
-            when (keyCode) {
-                Keyboard.KEY_A -> { selectAll(); return true }
-                Keyboard.KEY_C -> { copySelection(); return true }
-                Keyboard.KEY_V -> { paste(); return true }
-                Keyboard.KEY_X -> { cutSelection(); return true }
+            val keyName = KnitInputs.getDisplayName(keyCode, scanCode).lowercase()
+            when (keyName) {
+                "a" -> {
+                    selectAll()
+                    return true
+                }
+                "c" -> {
+                    copySelection()
+                    return true
+                }
+                "v" -> {
+                    paste()
+                    return true
+                }
+                "x" -> {
+                    cutSelection()
+                    return true
+                }
             }
+
+            return false
         }
 
-        return false
-    }
+        if (char.code < 32 || char == 127.toChar()) return false
+        if (!char.isDigit() && char != '.' && char != '-') return false
+        if (char == '.' && stringValue.contains('.')) return false
+        if (char == '-' && (cursorIndex != 0 || stringValue.contains('-'))) return false
+        if (char == '.' && !allowDecimals) return false
+        if (char == '-' && !allowNegative) return false
 
-    fun charTyped(chr: Char): Boolean {
-        if (!isFocused || chr.code < 32 || chr == 127.toChar()) return false
-        if (!chr.isDigit() && chr != '.') return false
-        if (chr == '.' && stringValue.contains('.')) return false
-        if (chr == '-' && (cursorIndex != 0 || stringValue.contains('-'))) return false
-        if (chr == '.' && !allowDecimals) return false
-        if (chr == '-' && !allowNegative) return false
-
-        insertText(chr.toString())
+        insertText(char.toString())
         return true
     }
 

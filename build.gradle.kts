@@ -25,7 +25,7 @@ dependencies {
         exclude(group = "org.intellij")
         exclude(group = "org.jetbrains")
     })
-    modApi(shade("xyz.meowing:knit-${mcData}:102")!!)
+    modApi(shade("xyz.meowing:knit-${mcData}:103")!!)
 }
 
 toolkitMavenPublishing {
