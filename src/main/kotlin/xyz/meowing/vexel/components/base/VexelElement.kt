@@ -66,8 +66,8 @@ abstract class VexelElement<T : VexelElement<T>>(
         val top get() = y
         val right get() = x + width
         val bottom get() = y + height
-        val centerX get() = (left + right) / 2
-        val centerY get() = (top + bottom) / 2
+        val centerX get() = (left + right) / 2f
+        val centerY get() = (top + bottom) / 2f
         val width get() = this@VexelElement.width
         val height get() = this@VexelElement.height
     }
