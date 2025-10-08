@@ -18,8 +18,6 @@ toolkitMultiversion {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
-    compileOnly("com.github.odtheking:odin-lwjgl:68de0d3e0b")
-
     api("org.lwjgl:lwjgl-nanovg:3.3.3")
     api("org.lwjgl:lwjgl-stb:3.3.3")
     api(shade("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
@@ -27,7 +25,7 @@ dependencies {
         exclude(group = "org.intellij")
         exclude(group = "org.jetbrains")
     })
-    modApi(shade("xyz.meowing:knit-${mcData}:102")!!)
+    modApi(shade("xyz.meowing:knit-${mcData}:103")!!)
 }
 
 toolkitMavenPublishing {
