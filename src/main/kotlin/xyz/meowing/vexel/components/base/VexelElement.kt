@@ -55,8 +55,8 @@ abstract class VexelElement<T : VexelElement<T>>(
         val top: Float get() = y / scaleFactor
         val right: Float get() = (x + width) / scaleFactor
         val bottom: Float get() = (y + height) / scaleFactor
-        val centerX: Float get() = (left + right) / 2f
-        val centerY: Float get() = (top + bottom) / 2f
+        val centerX: Float get() = (x + width / 2f) / scaleFactor
+        val centerY: Float get() = (y + height / 2f) / scaleFactor
         val width: Float get() = this@VexelElement.width / scaleFactor
         val height: Float get() = this@VexelElement.height / scaleFactor
     }
