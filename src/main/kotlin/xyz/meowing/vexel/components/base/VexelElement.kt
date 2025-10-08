@@ -246,7 +246,7 @@ abstract class VexelElement<T : VexelElement<T>>(
 
         x = when (xPositionConstraint) {
             Pos.ParentPercent -> {
-                if (visibleParent != null) visibleParent.x + (visibleParent.width * (xConstraint / 100f)) + xConstraint
+                if (visibleParent != null) visibleParent.x + (visibleParent.width * (xConstraint / 100f))
                 else xConstraint
             }
             Pos.ScreenPercent -> screenWidth * (xConstraint / 100f)
@@ -259,7 +259,7 @@ abstract class VexelElement<T : VexelElement<T>>(
                 if (visibleParent != null) visibleParent.x + (visibleParent.width - width) / 2f
                 else xConstraint
             }
-            Pos.ScreenCenter -> (screenWidth / 2f) - (width / 2f) + xConstraint
+            Pos.ScreenCenter -> (screenWidth / 2f) - (width / 2f)
             Pos.AfterSibling -> computeAfterSiblingX(visibleParent)
             Pos.MatchSibling -> computeMatchSiblingX()
         }
