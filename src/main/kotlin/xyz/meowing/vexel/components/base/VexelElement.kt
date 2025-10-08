@@ -138,6 +138,10 @@ abstract class VexelElement<T : VexelElement<T>>(
         children.forEach { it.destroy() }
         children.clear()
         listeners.clear()
+
+        if (cache.parentCacheValid) {
+            cache.cachedParent?.children?.remove(this)
+        }
     }
 
     fun drawAsRoot() {
