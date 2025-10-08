@@ -1,5 +1,6 @@
 package xyz.meowing.vexel.core
 
+import org.lwjgl.input.Keyboard
 import xyz.meowing.knit.api.screen.KnitScreen
 import xyz.meowing.vexel.Vexel.renderEngine
 
@@ -14,6 +15,8 @@ abstract class VexelScreen : KnitScreen() {
     open fun afterInitialization() {}
 
     final override fun onInitGui() {
+        Keyboard.enableRepeatEvents(true)
+
         if (!hasInitialized) {
             hasInitialized = true
             initialized = true
