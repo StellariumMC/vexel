@@ -129,18 +129,18 @@ abstract class VexelElement<T : VexelElement<T>>(
 
     private fun renderDebugHitbox() {
         if (!renderHitbox) return
+        children.forEach { it.enableDebugRendering() }
+
+        val color = if (isFocused) 0xFFFFA500.toInt() else if (isHovered) 0xFFFFFF00.toInt() else 0xFF00FFFF.toInt()
+
         NVGRenderer.push()
-        NVGRenderer.hollowRect(x, y, width, height, 2f, 0xFF00FF00.toInt(), 0f)
+        NVGRenderer.hollowRect(x, y, width, height, 1f, color, 0f)
         NVGRenderer.pop()
     }
 
     open fun destroy() {
-        children.forEach { it.destroy() }
-        children.clear()
-        listeners.clear()
-
-        if (cache.parentCacheValid) {
-            cache.cachedParent?.children?.remove(this)
+        if (parent is VexelElement<*>) {
+            (parent as VexelElement<*>).children.remove(this)
         }
     }
 
@@ -687,8 +687,8 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun renderHitbox(bool: Boolean): T {
-        renderHitbox = bool
+    fun enableDebugRendering(): T {
+        renderHitbox = true
         return this as T
     }
 
