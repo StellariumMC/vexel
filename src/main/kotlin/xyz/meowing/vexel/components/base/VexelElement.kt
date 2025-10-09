@@ -1,13 +1,13 @@
 package xyz.meowing.vexel.components.base
 
-import net.minecraft.client.util.Window
 import xyz.meowing.knit.api.input.KnitMouse
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.knit.api.render.KnitResolution
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.core.VexelWindow
 import xyz.meowing.vexel.animations.EasingType
 import xyz.meowing.vexel.animations.fadeIn
 import xyz.meowing.vexel.animations.fadeOut
+import xyz.meowing.vexel.components.core.Container
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Tooltip
 import xyz.meowing.vexel.utils.render.NVGRenderer
@@ -63,6 +63,11 @@ abstract class VexelElement<T : VexelElement<T>>(
     var xConstraint: Float = 0f
     var yConstraint: Float = 0f
 
+    var xOffset: Float = 0f
+    var yOffset: Float = 0f
+    var xOffsetType: Offset = Offset.Pixels
+    var yOffsetType: Offset = Offset.Pixels
+
     var isHovered: Boolean = false
     var isPressed: Boolean = false
     var isFocused: Boolean = false
@@ -70,9 +75,8 @@ abstract class VexelElement<T : VexelElement<T>>(
     var ignoreFocus: Boolean = false
     var requiresFocus: Boolean = false
 
-    val window: Window get() = mc.window
-    val screenWidth: Int get() = window.width
-    val screenHeight: Int get() = window.height
+    val screenWidth: Int get() = KnitResolution.windowWidth
+    val screenHeight: Int get() = KnitResolution.windowHeight
 
     var parent: Any? = null
         set(value) {
@@ -145,7 +149,7 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     fun drawAsRoot() {
-        NVGRenderer.beginFrame(mc.window.scaledWidth.toFloat(), mc.window.scaledHeight.toFloat())
+        NVGRenderer.beginFrame(screenWidth.toFloat(), screenHeight.toFloat())
         NVGRenderer.push()
         render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat())
         AnimationManager.update()
@@ -176,6 +180,14 @@ abstract class VexelElement<T : VexelElement<T>>(
         return null
     }
 
+    private fun getParentPadding(): FloatArray {
+        return when (val parent = findFirstVisibleParent()) {
+            is Rectangle -> parent.padding
+            is Container -> parent.padding
+            else -> floatArrayOf(0f, 0f, 0f, 0f)
+        }
+    }
+
     open fun updateWidth() {
         if (cache.sizeCacheValid) {
             width = cache.cachedWidth
@@ -189,9 +201,9 @@ abstract class VexelElement<T : VexelElement<T>>(
                 if (parentElement == null) {
                     screenWidth * (widthPercent / 100f)
                 } else {
-                    var w = parentElement.width * (widthPercent / 100f)
-                    if (parentElement is Rectangle) w -= (parentElement.padding[1] + parentElement.padding[3])
-                    w
+                    val padding = getParentPadding()
+                    val availableWidth = parentElement.width - (padding[1] + padding[3])
+                    availableWidth * (widthPercent / 100f)
                 }
             }
             Size.Pixels -> width
@@ -213,9 +225,9 @@ abstract class VexelElement<T : VexelElement<T>>(
                 if (parentElement == null) {
                     screenHeight * (heightPercent / 100f)
                 } else {
-                    var h = parentElement.height * (heightPercent / 100f)
-                    if (parentElement is Rectangle) h -= (parentElement.padding[0] + parentElement.padding[2])
-                    h
+                    val padding = getParentPadding()
+                    val availableHeight = parentElement.height - (padding[0] + padding[2])
+                    availableHeight * (heightPercent / 100f)
                 }
             }
             Size.Pixels -> height
@@ -238,103 +250,133 @@ abstract class VexelElement<T : VexelElement<T>>(
         return maxHeight?.coerceAtLeast(0f) ?: 0f
     }
 
+    private fun computeOffset(offset: Float, offsetType: Offset, isWidth: Boolean): Float {
+        return when (offsetType) {
+            Offset.Pixels -> offset
+            Offset.Percent -> {
+                val parentElement = findFirstVisibleParent()
+                val base = if (isWidth) {
+                    parentElement?.width ?: screenWidth.toFloat()
+                } else {
+                    parentElement?.height ?: screenHeight.toFloat()
+                }
+                base * (offset / 100f)
+            }
+        }
+    }
+
     fun updateX() {
         if (cache.positionCacheValid) return
 
         val visibleParent = findFirstVisibleParent()
+        val padding = getParentPadding()
+        val computedXOffset = computeOffset(xOffset, xOffsetType, true)
 
         x = when (xPositionConstraint) {
             Pos.ParentPercent -> {
-                if (visibleParent != null) visibleParent.x + (visibleParent.width * (xConstraint / 100f))
-                else xConstraint
+                val base = if (visibleParent != null) {
+                    visibleParent.x + padding[3] + (visibleParent.width - padding[1] - padding[3]) * (xConstraint / 100f)
+                } else {
+                    xConstraint
+                }
+                base + computedXOffset
             }
-            Pos.ScreenPercent -> screenWidth * (xConstraint / 100f)
+            Pos.ScreenPercent -> screenWidth * (xConstraint / 100f) + computedXOffset
             Pos.ParentPixels -> {
-                if (visibleParent != null) visibleParent.x + xConstraint
-                else xConstraint
+                val base = if (visibleParent != null) visibleParent.x + padding[3] + xConstraint else xConstraint
+                base + computedXOffset
             }
-            Pos.ScreenPixels -> xConstraint
+            Pos.ScreenPixels -> xConstraint + computedXOffset
             Pos.ParentCenter -> {
-                if (visibleParent != null) visibleParent.x + (visibleParent.width - width) / 2f
-                else xConstraint
+                val base = if (visibleParent != null) {
+                    val availableWidth = visibleParent.width - padding[1] - padding[3]
+                    visibleParent.x + padding[3] + (availableWidth - width) / 2f
+                } else {
+                    xConstraint
+                }
+                base + computedXOffset
             }
-            Pos.ScreenCenter -> (screenWidth / 2f) - (width / 2f) + xConstraint
-            Pos.AfterSibling -> computeAfterSiblingX(visibleParent)
-            Pos.MatchSibling -> computeMatchSiblingX()
+            Pos.ScreenCenter -> (screenWidth / 2f) - (width / 2f) + xConstraint + computedXOffset
+            Pos.AfterSibling -> computeAfterSiblingX(visibleParent) + computedXOffset
+            Pos.MatchSibling -> computeMatchSiblingX() + computedXOffset
         }
     }
 
     private fun computeAfterSiblingX(visibleParent: VexelElement<*>?): Float {
-        val parentElement = parent as? VexelElement<*> ?: return xConstraint
+        val parentElement = parent as? VexelElement<*> ?: return 0f
 
+        val padding = getParentPadding()
         val index = parentElement.children.indexOf(this)
         if (index <= 0) {
-            return if (visibleParent != null) visibleParent.x + xConstraint else xConstraint
+            return if (visibleParent != null) visibleParent.x + padding[3] else 0f
         }
 
         val prev = parentElement.children[index - 1]
-        val padding = if (prev is Rectangle) -(prev.padding[1] + prev.padding[3]) else 0f
-
-        return prev.x + prev.width + xConstraint + padding
+        return prev.x + prev.width
     }
 
     private fun computeMatchSiblingX(): Float {
-        val parentElement = parent as? VexelElement<*> ?: return xConstraint
+        val parentElement = parent as? VexelElement<*> ?: return 0f
 
         val index = parentElement.children.indexOf(this)
-        return if (index > 0) parentElement.children[index - 1].x else xConstraint
+        return if (index > 0) parentElement.children[index - 1].x else 0f
     }
 
     fun updateY() {
         if (cache.positionCacheValid) return
 
         val visibleParent = findFirstVisibleParent()
+        val padding = getParentPadding()
+        val computedYOffset = computeOffset(yOffset, yOffsetType, false)
 
         y = when (yPositionConstraint) {
             Pos.ParentPercent -> {
-                if (visibleParent != null) visibleParent.y + (visibleParent.height * (yConstraint / 100f))
-                else yConstraint
+                val base = if (visibleParent != null) {
+                    visibleParent.y + padding[0] + (visibleParent.height - padding[0] - padding[2]) * (yConstraint / 100f)
+                } else {
+                    yConstraint
+                }
+                base + computedYOffset
             }
-            Pos.ScreenPercent -> screenHeight * (yConstraint / 100f)
+            Pos.ScreenPercent -> screenHeight * (yConstraint / 100f) + computedYOffset
             Pos.ParentPixels -> {
-                if (visibleParent != null) visibleParent.y + yConstraint
-                else yConstraint
+                val base = if (visibleParent != null) visibleParent.y + padding[0] + yConstraint else yConstraint
+                base + computedYOffset
             }
-            Pos.ScreenPixels -> yConstraint
+            Pos.ScreenPixels -> yConstraint + computedYOffset
             Pos.ParentCenter -> {
-                if (visibleParent != null) visibleParent.y + visibleParent.height / 2f - height / 2f
-                else yConstraint
+                val base = if (visibleParent != null) {
+                    val availableHeight = visibleParent.height - padding[0] - padding[2]
+                    visibleParent.y + padding[0] + (availableHeight - height) / 2f
+                } else {
+                    yConstraint
+                }
+                base + computedYOffset
             }
-            Pos.ScreenCenter -> (screenHeight / 2f) - (height / 2f) + yConstraint
-            Pos.AfterSibling -> computeAfterSiblingY(visibleParent)
-            Pos.MatchSibling -> computeMatchSiblingY()
+            Pos.ScreenCenter -> (screenHeight / 2f) - (height / 2f) + yConstraint + computedYOffset
+            Pos.AfterSibling -> computeAfterSiblingY(visibleParent) + computedYOffset
+            Pos.MatchSibling -> computeMatchSiblingY() + computedYOffset
         }
     }
 
     private fun computeAfterSiblingY(visibleParent: VexelElement<*>?): Float {
         val parentElement = parent as? VexelElement<*> ?: return yConstraint
 
+        val padding = getParentPadding()
         val index = parentElement.children.indexOf(this)
         if (index <= 0) {
-            return if (visibleParent != null) visibleParent.y + yConstraint else yConstraint
+            return if (visibleParent != null) visibleParent.y + padding[0] + yConstraint else yConstraint
         }
 
         val prev = parentElement.children[index - 1]
-        val padding = if (parentElement is Rectangle) -parentElement.padding[0] else 0f
-
-        return prev.y + prev.height + yConstraint + padding
+        return prev.y + prev.height + yConstraint
     }
 
     private fun computeMatchSiblingY(): Float {
         val parentElement = parent as? VexelElement<*> ?: return yConstraint
 
         val index = parentElement.children.indexOf(this)
-        if (index <= 0) return yConstraint
-
-        val prev = parentElement.children[index - 1]
-        val padding = if (prev is Rectangle) yConstraint - (prev.padding[0] + prev.padding[2]) else yConstraint
-
-        return prev.y + padding
+        return if (index > 0) parentElement.children[index - 1].y else yConstraint
     }
 
     fun isPointInside(mouseX: Float, mouseY: Float): Boolean {
@@ -562,6 +604,26 @@ abstract class VexelElement<T : VexelElement<T>>(
         this.xPositionConstraint = xPos
         this.yConstraint = yVal
         this.yPositionConstraint = yPos
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun setOffset(xOffset: Float, xOffsetType: Offset, yOffset: Float, yOffsetType: Offset): T {
+        this.xOffset = xOffset
+        this.xOffsetType = xOffsetType
+        this.yOffset = yOffset
+        this.yOffsetType = yOffsetType
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun setOffset(xOffset: Float, yOffset: Float): T {
+        this.xOffset = xOffset
+        this.xOffsetType = Offset.Pixels
+        this.yOffset = yOffset
+        this.yOffsetType = Offset.Pixels
         cache.positionCacheValid = false
         return this as T
     }

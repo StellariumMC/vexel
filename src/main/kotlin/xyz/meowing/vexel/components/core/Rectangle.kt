@@ -322,20 +322,7 @@ open class Rectangle(
             NVGRenderer.translate(0f, -scrollOffset)
         }
 
-        children.forEach { child ->
-            val oldX = child.xConstraint
-            val oldY = child.yConstraint
-            try {
-                if (!child.isFloating) {
-                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels && child.xPositionConstraint != Pos.ParentPercent) child.xConstraint += padding[3]
-                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels && child.yPositionConstraint != Pos.ParentPercent) child.yConstraint += padding[0]
-                }
-                child.render(mouseX, mouseY)
-            } finally {
-                child.xConstraint = oldX
-                child.yConstraint = oldY
-            }
-        }
+        children.forEach { it.render(mouseX, mouseY) }
 
         if (scrollable) {
             NVGRenderer.popScissor()

@@ -1,15 +1,13 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.util.Window
 import xyz.meowing.knit.api.input.KnitMouse
-import xyz.meowing.vexel.Vexel
+import xyz.meowing.knit.api.render.KnitResolution
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.render.NVGRenderer
 
 class VexelWindow {
     val children: MutableList<VexelElement<*>> = mutableListOf()
-    val window: Window get() = Vexel.mc.window
 
     fun addChild(element: VexelElement<*>) {
         element.parent = this
@@ -22,7 +20,7 @@ class VexelWindow {
     }
 
     fun draw() {
-        NVGRenderer.beginFrame(window.width.toFloat(), window.height.toFloat())
+        NVGRenderer.beginFrame(KnitResolution.windowWidth.toFloat(), KnitResolution.windowHeight.toFloat())
         NVGRenderer.push()
         children.forEach { it.render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
         AnimationManager.update()

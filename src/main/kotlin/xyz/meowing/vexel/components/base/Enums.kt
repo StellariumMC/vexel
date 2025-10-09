@@ -16,3 +16,8 @@ enum class Pos {
     AfterSibling,
     MatchSibling
 }
+
+enum class Offset {
+    Pixels,
+    Percent
+}
