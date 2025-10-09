@@ -2,15 +2,15 @@ package xyz.meowing.vexel.components.base
 
 import xyz.meowing.knit.api.input.KnitMouse
 import xyz.meowing.knit.api.render.KnitResolution
-import xyz.meowing.vexel.Vexel.client as mc
 import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
-import xyz.meowing.vexel.core.VexelWindow
 import xyz.meowing.vexel.animations.EasingType
 import xyz.meowing.vexel.animations.fadeIn
 import xyz.meowing.vexel.animations.fadeOut
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Tooltip
+import xyz.meowing.vexel.core.VexelWindow
+import xyz.meowing.vexel.Vexel.client as mc
 
 abstract class VexelElement<T : VexelElement<T>>(
     var widthType: Size = Size.Pixels,
@@ -164,6 +164,10 @@ abstract class VexelElement<T : VexelElement<T>>(
         children.forEach { it.destroy() }
         children.clear()
         listeners.clear()
+
+        if (cache.parentCacheValid) {
+            cache.cachedParent?.children?.remove(this)
+        }
     }
 
     fun drawAsRoot() {
@@ -216,6 +220,7 @@ abstract class VexelElement<T : VexelElement<T>>(
                     w
                 }
             }
+
             Size.Pixels -> width
         }
 
@@ -240,6 +245,7 @@ abstract class VexelElement<T : VexelElement<T>>(
                     h
                 }
             }
+
             Size.Pixels -> height
         }
 
@@ -270,17 +276,20 @@ abstract class VexelElement<T : VexelElement<T>>(
                 if (visibleParent != null) visibleParent.x + (visibleParent.width * (xConstraint / 100f))
                 else xConstraint
             }
+
             Pos.ScreenPercent -> screenWidth * (xConstraint / 100f)
             Pos.ParentPixels -> {
                 if (visibleParent != null) visibleParent.x + xConstraint
                 else xConstraint
             }
+
             Pos.ScreenPixels -> xConstraint
             Pos.ParentCenter -> {
                 if (visibleParent != null) visibleParent.x + (visibleParent.width - width) / 2f
                 else xConstraint
             }
-            Pos.ScreenCenter -> (screenWidth / 2f) - (width / 2f)
+
+            Pos.ScreenCenter -> (screenWidth / 2f) - (width / 2f) + xConstraint
             Pos.AfterSibling -> computeAfterSiblingX(visibleParent)
             Pos.MatchSibling -> computeMatchSiblingX()
         }
@@ -317,16 +326,19 @@ abstract class VexelElement<T : VexelElement<T>>(
                 if (visibleParent != null) visibleParent.y + (visibleParent.height * (yConstraint / 100f))
                 else yConstraint
             }
+
             Pos.ScreenPercent -> screenHeight * (yConstraint / 100f)
             Pos.ParentPixels -> {
                 if (visibleParent != null) visibleParent.y + yConstraint
                 else yConstraint
             }
+
             Pos.ScreenPixels -> yConstraint
             Pos.ParentCenter -> {
                 if (visibleParent != null) visibleParent.y + visibleParent.height / 2f - height / 2f
                 else yConstraint
             }
+
             Pos.ScreenCenter -> (screenHeight / 2f) - (height / 2f) + yConstraint
             Pos.AfterSibling -> computeAfterSiblingY(visibleParent)
             Pos.MatchSibling -> computeMatchSiblingY()
@@ -380,6 +392,7 @@ abstract class VexelElement<T : VexelElement<T>>(
                     tooltip.innerText.fadeIn(200, EasingType.EASE_OUT)
                 }
             }
+
             !isHovered && wasHovered -> {
                 for (listener in mouseExitListeners) {
                     listener(mouseX, mouseY)
@@ -420,6 +433,7 @@ abstract class VexelElement<T : VexelElement<T>>(
 
                 listenerHandled || mouseClickListeners.isEmpty()
             }
+
             else -> {
                 if (requiresFocus && isFocused) unfocus()
                 false
@@ -475,7 +489,8 @@ abstract class VexelElement<T : VexelElement<T>>(
             it.handleCharType(keyCode, scanCode, charTyped)
         }
 
-        val selfHandled = if (isFocused || ignoreFocus) charTypeListeners.any { it(keyCode, scanCode, charTyped) } else false
+        val selfHandled =
+            if (isFocused || ignoreFocus) charTypeListeners.any { it(keyCode, scanCode, charTyped) } else false
 
         return childHandled || selfHandled
     }
