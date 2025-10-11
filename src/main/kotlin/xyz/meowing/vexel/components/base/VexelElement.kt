@@ -21,6 +21,8 @@ abstract class VexelElement<T : VexelElement<T>>(
     var renderHitbox = false
     var xPositionConstraint = Pos.ParentPixels
     var yPositionConstraint = Pos.ParentPixels
+    var xAlignment = Alignment.None
+    var yAlignment = Alignment.None
 
     var x: Float = 0f
         set(value) {
@@ -123,8 +125,8 @@ abstract class VexelElement<T : VexelElement<T>>(
             cache.lastScreenHeight = screenHeight
 
             val screenPosModes = setOf(Pos.ScreenPercent, Pos.ScreenPixels, Pos.ScreenCenter)
-            if (xPositionConstraint in screenPosModes) cache.positionCacheValid = false
-            if (yPositionConstraint in screenPosModes) cache.positionCacheValid = false
+            if (xPositionConstraint in screenPosModes || xAlignment != Alignment.None) cache.positionCacheValid = false
+            if (yPositionConstraint in screenPosModes || yAlignment != Alignment.None) cache.positionCacheValid = false
             if (widthType == Size.ParentPerc && parent !is VexelElement<*>) cache.sizeCacheValid = false
             if (heightType == Size.ParentPerc && parent !is VexelElement<*>) cache.sizeCacheValid = false
         }
@@ -300,6 +302,8 @@ abstract class VexelElement<T : VexelElement<T>>(
             Pos.AfterSibling -> computeAfterSiblingX(visibleParent) + computedXOffset
             Pos.MatchSibling -> computeMatchSiblingX() + computedXOffset
         }
+
+        x = applyXAlignment(x, visibleParent, padding)
     }
 
     private fun computeAfterSiblingX(visibleParent: VexelElement<*>?): Float {
@@ -357,6 +361,8 @@ abstract class VexelElement<T : VexelElement<T>>(
             Pos.AfterSibling -> computeAfterSiblingY(visibleParent) + computedYOffset
             Pos.MatchSibling -> computeMatchSiblingY() + computedYOffset
         }
+
+        y = applyYAlignment(y, visibleParent, padding)
     }
 
     private fun computeAfterSiblingY(visibleParent: VexelElement<*>?): Float {
@@ -377,6 +383,22 @@ abstract class VexelElement<T : VexelElement<T>>(
 
         val index = parentElement.children.indexOf(this)
         return if (index > 0) parentElement.children[index - 1].y else yConstraint
+    }
+
+    private fun applyXAlignment(baseX: Float, visibleParent: VexelElement<*>?, padding: FloatArray): Float {
+        return when (xAlignment) {
+            Alignment.None -> baseX
+            Alignment.Left -> if (visibleParent != null) visibleParent.x + padding[3] else 0f
+            Alignment.Right -> if (visibleParent != null) visibleParent.x + visibleParent.width - padding[1] - width else screenWidth - width
+        }
+    }
+
+    private fun applyYAlignment(baseY: Float, visibleParent: VexelElement<*>?, padding: FloatArray): Float {
+        return when (yAlignment) {
+            Alignment.None -> baseY
+            Alignment.Left -> if (visibleParent != null) visibleParent.y + padding[0] else 0f
+            Alignment.Right -> if (visibleParent != null) visibleParent.y + visibleParent.height - padding[2] - height else screenHeight - height
+        }
     }
 
     fun isPointInside(mouseX: Float, mouseY: Float): Boolean {
@@ -609,6 +631,89 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     @Suppress("UNCHECKED_CAST")
+    fun setPositioning(xVal: Any, xPos: Pos, yVal: Any, yPos: Pos): T {
+        this.xConstraint = when (xVal) {
+            is DimensionValue -> xVal.resolve(this, true)
+            is Float -> xVal
+            is Int -> xVal.toFloat()
+            else -> 0f
+        }
+        this.xPositionConstraint = xPos
+
+        this.yConstraint = when (yVal) {
+            is DimensionValue -> yVal.resolve(this, false)
+            is Float -> yVal
+            is Int -> yVal.toFloat()
+            else -> 0f
+        }
+        this.yPositionConstraint = yPos
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun setSizing(width: Any, widthType: Size, height: Any, heightType: Size): T {
+        this.widthType = widthType
+        this.heightType = heightType
+
+        val resolvedWidth = when (width) {
+            is DimensionValue -> width.resolve(this, true)
+            is Float -> width
+            is Int -> width.toFloat()
+            else -> 0f
+        }
+
+        val resolvedHeight = when (height) {
+            is DimensionValue -> height.resolve(this, false)
+            is Float -> height
+            is Int -> height.toFloat()
+            else -> 0f
+        }
+
+        if (widthType == Size.Pixels) this.width = resolvedWidth else this.widthPercent = resolvedWidth
+        if (heightType == Size.Pixels) this.height = resolvedHeight else this.heightPercent = resolvedHeight
+
+        cache.sizeCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun setAlignment(xAlignment: Alignment, yAlignment: Alignment): T {
+        this.xAlignment = xAlignment
+        this.yAlignment = yAlignment
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun alignLeft(): T {
+        this.xAlignment = Alignment.Left
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun alignRight(): T {
+        this.xAlignment = Alignment.Right
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun alignTop(): T {
+        this.yAlignment = Alignment.Left
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun alignBottom(): T {
+        this.yAlignment = Alignment.Right
+        cache.positionCacheValid = false
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
     fun setOffset(xOffset: Float, xOffsetType: Offset, yOffset: Float, yOffsetType: Offset): T {
         this.xOffset = xOffset
         this.xOffsetType = xOffsetType
@@ -758,3 +863,6 @@ abstract class VexelElement<T : VexelElement<T>>(
     val pressed: Boolean get() = isPressed
     val focused: Boolean get() = isFocused
 }
+
+fun Float.percent(): DimensionValue = DimensionValue.Percent(this)
+fun Float.pixels(): DimensionValue = DimensionValue.Pixels(this)

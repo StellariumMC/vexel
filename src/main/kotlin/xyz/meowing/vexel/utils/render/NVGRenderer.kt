@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.util.Identifier
 import org.lwjgl.nanovg.*
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL14
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
@@ -104,6 +105,81 @@ object NVGRenderer {
         GlStateManager._disableDepthTest()
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
+
+        if (GL11.glIsEnabled(GL11.GL_BLEND)) {
+            //#if MC >= 1.21.5
+            GlStateManager._enableBlend()
+            GL14.glBlendEquation(GL11.glGetInteger(GL20.GL_BLEND_EQUATION_RGB))
+            GlStateManager._blendFuncSeparate(
+                //#elseif MC >= 1.17.1
+                //$$ GlStateManager._enableBlend()
+                //$$ RenderSystem.blendEquation(GL11.glGetInteger(GL20.GL_BLEND_EQUATION_RGB))
+                //$$ RenderSystem.blendFuncSeparate(
+                //#endif
+                GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB),
+                GL11.glGetInteger(GL14.GL_BLEND_DST_RGB),
+                GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA),
+                GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA)
+            )
+        } else {
+            //#if MC >= 1.21.5
+            GlStateManager._disableBlend()
+            //#elseif MC >= 1.17.1
+            //$$ GlStateManager._disableBlend()
+            //#endif
+        }
+
+        if (GL11.glIsEnabled(GL11.GL_DEPTH_TEST)) {
+            //#if MC >= 1.21.5
+            GlStateManager._enableDepthTest()
+            GlStateManager._depthFunc(GL11.glGetInteger(GL11.GL_DEPTH_FUNC))
+            //#elseif MC >= 1.17.1
+            //$$ RenderSystem.enableDepthTest()
+            //$$ RenderSystem.depthFunc(GL11.glGetInteger(GL11.GL_DEPTH_FUNC))
+            //#endif
+        } else {
+            //#if MC >= 1.21.5
+            GlStateManager._disableDepthTest()
+            //#elseif MC >= 1.17.1
+            //$$ RenderSystem.disableDepthTest()
+            //#endif
+        }
+
+        //#if MC >= 1.21.5
+        GlStateManager._depthMask(GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK))
+        //#elseif MC >= 1.17.1
+        //$$ RenderSystem.depthMask(GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK))
+        //#endif
+
+        if (GL11.glIsEnabled(GL11.GL_CULL_FACE)) {
+            //#if MC >= 1.21.5
+            GlStateManager._enableCull()
+            //#elseif MC >= 1.17.1
+            //$$ GlStateManager._enableCull()
+            //#endif
+            GL11.glCullFace(GL11.glGetInteger(GL11.GL_CULL_FACE_MODE))
+        } else {
+            //#if MC >= 1.21.5
+            GlStateManager._disableCull()
+            //#elseif MC >= 1.17.1
+            //$$ GlStateManager._disableCull()
+            //#endif
+        }
+
+        val buffer = ByteBuffer.allocateDirect(16)
+        //#if MC >= 1.16.5
+        GL11.glGetBooleanv(GL11.GL_COLOR_WRITEMASK, buffer)
+        //#endif
+        //#if MC >= 1.21.5
+        GlStateManager._colorMask(
+            //#elseif MC >= 1.17.1
+            //$$ RenderSystem.colorMask(
+            //#endif
+            buffer.get(0).toInt() != 0,
+            buffer.get(1).toInt() != 0,
+            buffer.get(2).toInt() != 0,
+            buffer.get(3).toInt() != 0
+        )
 
         if (previousProgram != -1) GL20.glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
