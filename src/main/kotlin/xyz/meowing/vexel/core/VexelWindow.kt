@@ -53,7 +53,7 @@ class VexelWindow {
     }
 
     fun cleanup() {
-        children.forEach { it.destroy() }
+        children.toList().forEach { it.destroy() }
         children.clear()
         AnimationManager.clear()
         NVGRenderer.cleanCache()

@@ -145,9 +145,15 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     open fun destroy() {
-        if (parent is VexelElement<*>) {
-            (parent as VexelElement<*>).children.remove(this)
-        }
+        children.toList().forEach { it.destroy() }
+        children.clear()
+        listeners.clear()
+        tooltipElement?.destroy()
+        tooltipElement = null
+        onValueChange = null
+
+        (parent as? VexelElement<*>)?.children?.remove(this)
+        parent = null
     }
 
     fun drawAsRoot() {
