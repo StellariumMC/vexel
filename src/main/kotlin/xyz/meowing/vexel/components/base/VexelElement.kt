@@ -50,6 +50,33 @@ abstract class VexelElement<T : VexelElement<T>>(
             invalidateChildrenSizes()
         }
 
+    inner class Scaled {
+        val scaleFactor get() = KnitResolution.scaleFactor.toFloat()
+
+        val left: Float get() = x / scaleFactor
+        val top: Float get() = y / scaleFactor
+        val right: Float get() = (x + width) / scaleFactor
+        val bottom: Float get() = (y + height) / scaleFactor
+        val centerX: Float get() = (x + width / 2f) / scaleFactor
+        val centerY: Float get() = (y + height / 2f) / scaleFactor
+        val width: Float get() = this@VexelElement.width / scaleFactor
+        val height: Float get() = this@VexelElement.height / scaleFactor
+    }
+
+    inner class Raw {
+        val left get() = x
+        val top get() = y
+        val right get() = x + width
+        val bottom get() = y + height
+        val centerX get() = (left + right) / 2f
+        val centerY get() = (top + bottom) / 2f
+        val width get() = this@VexelElement.width
+        val height get() = this@VexelElement.height
+    }
+
+    val raw = Raw()
+    val scaled = Scaled()
+
     var widthPercent: Float = 100f
     var heightPercent: Float = 100f
 
