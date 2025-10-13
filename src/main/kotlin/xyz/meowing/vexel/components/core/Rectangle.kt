@@ -179,21 +179,23 @@ open class Rectangle(
             val scrollRatio = (relativeY / viewHeight).coerceIn(0f, 1f)
             val maxScroll = contentHeight - viewHeight
             scrollOffset = (scrollRatio * maxScroll).coerceIn(0f, maxScroll)
-
             updateHoverStates(mouseX, mouseY)
             return true
         }
 
         updateHoverStates(mouseX, mouseY)
-
         val adjustedMouseY = if (scrollable) mouseY + scrollOffset else mouseY
-        val childHandled = if (scrollable && !isMouseOnVisible(mouseX, mouseY)) {
-            false
-        } else {
-            children.reversed().any { it.handleMouseMove(mouseX, adjustedMouseY) }
+        children.reversed().forEach { child ->
+            if (scrollable && !isMouseOnVisible(mouseX, mouseY)) {
+                if (child.isHovered) {
+                    child.isHovered = false
+                    child.mouseExitListeners.forEach { it(mouseX, adjustedMouseY) }
+                }
+            } else {
+                child.handleMouseMove(mouseX, adjustedMouseY)
+            }
         }
-
-        return childHandled || isHovered
+        return isHovered
     }
 
     override fun handleMouseClick(mouseX: Float, mouseY: Float, button: Int): Boolean {
