@@ -1,10 +1,9 @@
 package xyz.meowing.vexel.components.core
 
-import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.core.VexelWindow
-import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
+import xyz.meowing.vexel.utils.render.NVGRenderer
 
 open class Container(
     var padding: FloatArray = floatArrayOf(0f, 0f, 0f, 0f),
@@ -29,7 +28,7 @@ open class Container(
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
-        renderEngine.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
+        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
     }
 
     private fun isPointInScrollbar(mouseX: Float, mouseY: Float): Boolean {
@@ -224,38 +223,21 @@ open class Container(
             val viewHeight = height - padding[0] - padding[2]
             val buffer = 2f
 
-            renderEngine.push()
-            renderEngine.pushScissor(
+            NVGRenderer.push()
+            NVGRenderer.pushScissor(
                 contentX - buffer,
                 contentY - buffer,
                 viewWidth + buffer * 2,
                 viewHeight + buffer * 2
             )
-            renderEngine.translate(0f, -scrollOffset)
+            NVGRenderer.translate(0f, -scrollOffset)
         }
 
-        children.forEach { child ->
-            val oldX = child.xConstraint
-            val oldY = child.yConstraint
-            try {
-                if (!child.isFloating) {
-                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels && child.xPositionConstraint != Pos.ParentPercent) {
-                        child.xConstraint += padding[3]
-                    }
-                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels && child.yPositionConstraint != Pos.ParentPercent) {
-                        child.yConstraint += padding[0]
-                    }
-                }
-                child.render(mouseX, mouseY)
-            } finally {
-                child.xConstraint = oldX
-                child.yConstraint = oldY
-            }
-        }
+        children.forEach { it.render(mouseX, mouseY) }
 
         if (scrollable) {
-            renderEngine.popScissor()
-            renderEngine.pop()
+            NVGRenderer.popScissor()
+            NVGRenderer.pop()
         }
 
         if (isHovered || isDraggingScrollbar) drawScrollbar()

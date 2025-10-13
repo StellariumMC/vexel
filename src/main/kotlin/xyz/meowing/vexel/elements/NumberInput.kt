@@ -1,7 +1,6 @@
 package xyz.meowing.vexel.elements
 
 import net.minecraft.client.gui.GuiScreen
-import org.lwjgl.input.Keyboard
 import xyz.meowing.knit.api.input.KnitInputs
 import xyz.meowing.knit.api.input.KnitKeyboard
 import xyz.meowing.knit.api.input.KnitKeys
@@ -119,7 +118,7 @@ class NumberInput(
                 when (clickCount) {
                     1 -> {
                         cursorIndex = newCursorIndex
-                        if (!GuiScreen.isShiftKeyDown()) {
+                        if (!KnitKeyboard.isShiftKeyPressed) {
                             selectionAnchor = cursorIndex
                         }
                     }

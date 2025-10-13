@@ -2,9 +2,9 @@ package xyz.meowing.vexel.core
 
 import xyz.meowing.knit.api.input.KnitMouse
 import xyz.meowing.knit.api.render.KnitResolution
+import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.Vexel.renderEngine
 
 class VexelWindow {
     val children: MutableList<VexelElement<*>> = mutableListOf()
@@ -53,7 +53,7 @@ class VexelWindow {
     }
 
     fun cleanup() {
-        children.forEach { it.destroy() }
+        children.toList().forEach { it.destroy() }
         children.clear()
         AnimationManager.clear()
         renderEngine.cleanCache()

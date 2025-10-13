@@ -2,9 +2,12 @@ package xyz.meowing.vexel.core
 
 import org.lwjgl.input.Keyboard
 import xyz.meowing.knit.api.screen.KnitScreen
-import xyz.meowing.vexel.Vexel.renderEngine
+import xyz.meowing.vexel.Vexel
+import xyz.meowing.vexel.utils.render.NVGRenderer
+import java.util.Timer
+import kotlin.concurrent.schedule
 
-abstract class VexelScreen : KnitScreen() {
+abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(screenName) {
     var initialized = false
         private set
     var hasInitialized = false
@@ -21,7 +24,7 @@ abstract class VexelScreen : KnitScreen() {
             hasInitialized = true
             initialized = true
 
-            renderEngine.cleanCache()
+            NVGRenderer.cleanCache()
 
             afterInitialization()
         } else {
@@ -31,6 +34,7 @@ abstract class VexelScreen : KnitScreen() {
 
     override fun onCloseGui() {
         window.cleanup()
+        Keyboard.enableRepeatEvents(false)
         hasInitialized = false
     }
 
@@ -59,6 +63,14 @@ abstract class VexelScreen : KnitScreen() {
     }
 
     override fun onKeyType(typedChar: Char, keyCode: Int, scanCode: Int) {
-        window.charType(keyCode, scanCode, typedChar)
+        window.charType(keyCode, scanCode,typedChar)
+    }
+
+    fun display() {
+        Timer().schedule(50) {
+            Vexel.client.addScheduledTask {
+                Vexel.client.displayGuiScreen(this@VexelScreen)
+            }
+        }
     }
 }

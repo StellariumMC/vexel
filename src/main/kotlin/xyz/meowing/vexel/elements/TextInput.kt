@@ -1,7 +1,6 @@
 package xyz.meowing.vexel.elements
 
 import net.minecraft.client.gui.GuiScreen
-import org.lwjgl.input.Keyboard
 import xyz.meowing.knit.api.input.KnitInputs
 import xyz.meowing.knit.api.input.KnitKeyboard
 import xyz.meowing.knit.api.input.KnitKeys
@@ -104,7 +103,7 @@ class TextInput(
                 when (clickCount) {
                     1 -> {
                         cursorIndex = newCursorIndex
-                        if (!GuiScreen.isShiftKeyDown()) {
+                        if (!KnitKeyboard.isShiftKeyPressed) {
                             selectionAnchor = cursorIndex
                         }
                     }
@@ -230,12 +229,6 @@ class TextInput(
         }
 
         return false
-    }
-
-    fun charTyped(chr: Char): Boolean {
-        if (!isFocused || chr.code < 32 || chr == 127.toChar()) return false
-        insertText(chr.toString())
-        return true
     }
 
     private fun resetCaretBlink() {

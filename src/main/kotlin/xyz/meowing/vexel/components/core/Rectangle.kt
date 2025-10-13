@@ -1,6 +1,5 @@
 package xyz.meowing.vexel.components.core
 
-import xyz.meowing.vexel.Vexel.renderEngine
 import xyz.meowing.vexel.animations.EasingType
 import xyz.meowing.vexel.animations.animateFloat
 import xyz.meowing.vexel.animations.fadeIn
@@ -9,6 +8,7 @@ import xyz.meowing.vexel.core.VexelWindow
 import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
+import xyz.meowing.vexel.utils.render.NVGRenderer
 import xyz.meowing.vexel.utils.style.Gradient
 import java.awt.Color
 import kotlin.math.roundToInt
@@ -52,34 +52,34 @@ open class Rectangle(
         val centerY = y + height / 2f
 
         if (rotation != 0f) {
-            renderEngine.push()
-            renderEngine.translate(centerX, centerY)
-            renderEngine.rotate(Math.toRadians(rotation.toDouble()).toFloat())
-            renderEngine.translate(-centerX, -centerY)
+            NVGRenderer.push()
+            NVGRenderer.translate(centerX, centerY)
+            NVGRenderer.rotate(Math.toRadians(rotation.toDouble()).toFloat())
+            NVGRenderer.translate(-centerX, -centerY)
         }
 
         if (dropShadow) {
-            renderEngine.dropShadow(x, y, width, height, shadowBlur, shadowSpread, Color(shadowColor), borderRadius)
+            NVGRenderer.dropShadow(x, y, width, height, shadowBlur, shadowSpread, Color(shadowColor), borderRadius)
         }
 
         if (currentBgColor != 0) {
-            if (currentBgColor == backgroundColor && secondBackgroundColor != -1) {
-                renderEngine.gradientRect(x, y, width, height, backgroundColor, secondBackgroundColor, gradientType, borderRadius)
+            if(currentBgColor == backgroundColor && secondBackgroundColor != -1) {
+                NVGRenderer.gradientRect(x, y, width, height, backgroundColor, secondBackgroundColor, gradientType, borderRadius)
             } else {
-                renderEngine.rect(x, y, width, height, currentBgColor, borderRadius)
+                NVGRenderer.rect(x, y, width, height, currentBgColor, borderRadius)
             }
         }
 
         if (borderThickness > 0f) {
             if (secondBorderColor != -1) {
-                renderEngine.hollowGradientRect(x, y, width, height, borderThickness, borderColor, secondBorderColor, gradientType, borderRadius)
+                NVGRenderer.hollowGradientRect(x, y, width, height, borderThickness, borderColor, secondBorderColor, gradientType, borderRadius)
             } else {
-                renderEngine.hollowRect(x, y, width, height, borderThickness, borderColor, borderRadius)
+                NVGRenderer.hollowRect(x, y, width, height, borderThickness, borderColor, borderRadius)
             }
         }
 
         if (rotation != 0f) {
-            renderEngine.pop()
+            NVGRenderer.pop()
         }
     }
 
@@ -96,7 +96,7 @@ open class Rectangle(
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
-        renderEngine.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
+        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
     }
 
     private fun isPointInScrollbar(mouseX: Float, mouseY: Float): Boolean {
@@ -312,34 +312,21 @@ open class Rectangle(
             val viewHeight = height - padding[0] - padding[2]
             val buffer = 2f
 
-            renderEngine.push()
-            renderEngine.pushScissor(
+            NVGRenderer.push()
+            NVGRenderer.pushScissor(
                 contentX - buffer,
                 contentY - buffer,
                 viewWidth + buffer * 2,
                 viewHeight + buffer * 2
             )
-            renderEngine.translate(0f, -scrollOffset)
+            NVGRenderer.translate(0f, -scrollOffset)
         }
 
-        children.forEach { child ->
-            val oldX = child.xConstraint
-            val oldY = child.yConstraint
-            try {
-                if (!child.isFloating) {
-                    if (child.xPositionConstraint != Pos.MatchSibling && child.xPositionConstraint != Pos.ScreenPixels && child.xPositionConstraint != Pos.ParentPercent) child.xConstraint += padding[3]
-                    if (child.yPositionConstraint != Pos.MatchSibling && child.yPositionConstraint != Pos.ScreenPixels && child.yPositionConstraint != Pos.ParentPercent) child.yConstraint += padding[0]
-                }
-                child.render(mouseX, mouseY)
-            } finally {
-                child.xConstraint = oldX
-                child.yConstraint = oldY
-            }
-        }
+        children.forEach { it.render(mouseX, mouseY) }
 
         if (scrollable) {
-            renderEngine.popScissor()
-            renderEngine.pop()
+            NVGRenderer.popScissor()
+            NVGRenderer.pop()
         }
 
         if (isHovered || isDraggingScrollbar) drawScrollbar()
@@ -350,7 +337,7 @@ open class Rectangle(
         return this
     }
 
-    fun dropShadow(shadowBlur: Float = 30f, shadowSpread: Float = 1f, shadowColor: Int = 0x000000): Rectangle = apply {
+    fun dropShadow(shadowBlur: Float=30f, shadowSpread: Float=1f, shadowColor: Int =0x000000): Rectangle = apply {
         dropShadow = true
         this.shadowBlur = shadowBlur
         this.shadowSpread = shadowSpread
