@@ -29,7 +29,7 @@ class VexelWindow {
     }
 
     fun mouseClick(button: Int) {
-        children.reversed().any { it.handleMouseClick(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
+        children.reversed().forEach { it.handleMouseClick(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
     fun mouseRelease(button: Int) {
@@ -37,15 +37,15 @@ class VexelWindow {
     }
 
     fun mouseMove() {
-        children.reversed().any { it.handleMouseMove(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
+        children.reversed().forEach { it.handleMouseMove(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
     }
 
     fun mouseScroll(horizontalDelta: Double, verticalDelta: Double) {
-        children.reversed().any { it.handleMouseScroll(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), horizontalDelta, verticalDelta) }
+        children.reversed().forEach { it.handleMouseScroll(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), horizontalDelta, verticalDelta) }
     }
 
     fun charType(keyCode: Int, scanCode: Int , charTyped: Char) {
-        children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
+        children.reversed().forEach { it.handleCharType(keyCode, scanCode, charTyped) }
     }
 
     fun onWindowResize() {
