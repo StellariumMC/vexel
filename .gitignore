@@ -46,4 +46,4 @@ replay_*.log
 
 # secrets
 
-deploying/
+secrets.gradle.kts
