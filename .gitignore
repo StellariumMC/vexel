@@ -47,3 +47,5 @@ replay_*.log
 # secrets
 
 secrets.gradle.kts
+src/main/kotlin/xyz/meowing/vexel/OffsetTestScreen.kt
+src/main/kotlin/xyz/meowing/vexel/TestScreen.kt
