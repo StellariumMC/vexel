@@ -61,9 +61,20 @@ open class Container(
         if (isHovered) mouseMoveListeners.forEach { it(mouseX, mouseY) }
 
         children.reversed().forEach { child ->
-            if (scrollable && !isMouseOnVisible(mouseX, mouseY)) return@forEach
-            child.handleMouseMove(mouseX, adjustedMouseY)
+            if (scrollable && !isMouseOnVisible(mouseX, mouseY)) {
+                unhoverRecursive(child, mouseX, adjustedMouseY)
+            } else {
+                child.handleMouseMove(mouseX, adjustedMouseY)
+            }
         }
+    }
+
+    private fun unhoverRecursive(element: VexelElement<*>, mouseX: Float, mouseY: Float) {
+        if (element.isHovered) {
+            element.isHovered = false
+            element.mouseExitListeners.forEach { it(mouseX, mouseY) }
+        }
+        element.children.forEach { unhoverRecursive(it, mouseX, mouseY) }
     }
 
     override fun handleMouseScroll(mouseX: Float, mouseY: Float, horizontal: Double, vertical: Double): Boolean {
@@ -182,8 +193,7 @@ open class Container(
         val contentY = y + padding[0]
         val viewWidth = width - padding[1] - padding[3]
         val viewHeight = height - padding[0] - padding[2]
-        return mouseX >= contentX && mouseX <= contentX + viewWidth &&
-                mouseY >= contentY && mouseY <= contentY + viewHeight
+        return mouseX >= contentX && mouseX <= contentX + viewWidth && mouseY >= contentY && mouseY <= contentY + viewHeight
     }
 
     fun isVisibleInScrollableParents(): Boolean {
@@ -234,14 +244,13 @@ open class Container(
             val contentY = y + padding[0]
             val viewWidth = width - padding[1] - padding[3]
             val viewHeight = height - padding[0] - padding[2]
-            val buffer = 2f
 
             NVGRenderer.push()
             NVGRenderer.pushScissor(
-                contentX - buffer,
-                contentY - buffer,
-                viewWidth + buffer * 2,
-                viewHeight + buffer * 2
+                contentX,
+                contentY,
+                viewWidth,
+                viewHeight
             )
             NVGRenderer.translate(0f, -scrollOffset)
         }

@@ -3,7 +3,8 @@ package xyz.meowing.vexel.components.base
 enum class Size {
     Auto,
     ParentPerc,
-    Pixels
+    Pixels,
+    Fill
 }
 
 enum class Pos {
@@ -24,6 +25,6 @@ enum class Offset {
 
 enum class Alignment {
     None,
-    Left,
-    Right
+    Start,
+    End
 }
