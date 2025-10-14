@@ -1,7 +1,6 @@
 package xyz.meowing.vexel.components.core
 
 import xyz.meowing.vexel.core.VexelWindow
-import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.render.NVGRenderer
@@ -13,33 +12,36 @@ open class Container(
     heightType: Size = Size.Auto
 ) : VexelElement<Container>(widthType, heightType) {
     var scrollOffset: Float = 0f
+    var showScrollbar: Boolean = true
+    var scrollbarWidth: Float = 6f
+    var scrollbarColor: Int = 0xFF7c7c7d.toInt()
+    var scrollbarRadius: Float = 3f
+    var scrollbarPadding: Float = 0f
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
 
     override fun onRender(mouseX: Float, mouseY: Float) {}
 
     private fun drawScrollbar() {
-        if (!scrollable) return
+        if (!scrollable || !showScrollbar) return
         val contentHeight = getContentHeight()
         val viewHeight = height - padding[0] - padding[2]
         if (contentHeight <= viewHeight) return
 
-        val scrollbarWidth = 6f
-        val scrollbarX = x + width - padding[1] - scrollbarWidth
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
-        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
+        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, scrollbarColor, scrollbarRadius)
     }
 
     private fun isPointInScrollbar(mouseX: Float, mouseY: Float): Boolean {
-        if (!scrollable) return false
+        if (!scrollable || !showScrollbar) return false
         val contentHeight = getContentHeight()
         val viewHeight = height - padding[0] - padding[2]
         if (contentHeight <= viewHeight) return false
 
-        val scrollbarWidth = 6f
-        val scrollbarX = x + width - padding[1] - scrollbarWidth
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
@@ -113,6 +115,7 @@ open class Container(
                 child.handleMouseMove(mouseX, adjustedMouseY)
             }
         }
+
         return isHovered
     }
 
@@ -189,10 +192,16 @@ open class Container(
             when (current) {
                 is VexelElement<*> -> {
                     if (!current.visible) return false
-                    if (current is Container && current.scrollable) {
-                        val centerX = getScreenX() + width / 2
-                        val centerY = getScreenY() + height / 2
-                        if (!current.isMouseOnVisible(centerX, centerY)) return false
+                    val centerX = getScreenX() + width / 2
+                    val centerY = getScreenY() + height / 2
+                    when (current) {
+                        is Container if current.scrollable -> {
+                            if (!current.isMouseOnVisible(centerX, centerY)) return false
+                        }
+
+                        is Rectangle if current.scrollable -> {
+                            if (!current.isMouseOnVisible(centerX, centerY)) return false
+                        }
                     }
                     current = current.parent
                 }
@@ -244,7 +253,7 @@ open class Container(
             NVGRenderer.pop()
         }
 
-        if (isHovered || isDraggingScrollbar) drawScrollbar()
+        if (showScrollbar && (isHovered || isDraggingScrollbar)) drawScrollbar()
     }
 
     open fun getScreenX(): Float = x
@@ -255,6 +264,7 @@ open class Container(
         while (current != null) {
             when (current) {
                 is Container -> totalScrollOffset += current.scrollOffset
+                is Rectangle -> totalScrollOffset += current.scrollOffset
                 is VexelWindow -> break
             }
             current = if (current is VexelElement<*>) current.parent else null
@@ -263,6 +273,26 @@ open class Container(
     }
 
     open fun scrollable(enabled: Boolean): Container = apply { scrollable = enabled }
+
+    open fun showScrollbar(show: Boolean): Container = apply {
+        showScrollbar = show
+    }
+
+    open fun scrollbarWidth(width: Float): Container = apply {
+        scrollbarWidth = width
+    }
+
+    open fun scrollbarColor(color: Int): Container = apply {
+        scrollbarColor = color
+    }
+
+    open fun scrollbarRadius(radius: Float): Container = apply {
+        scrollbarRadius = radius
+    }
+
+    open fun scrollbarPadding(padding: Float): Container = apply {
+        scrollbarPadding = padding
+    }
 
     open fun padding(top: Float = 0f, right: Float = 0f, bottom: Float = 0f, left: Float = 0f): Container = apply {
         padding[0] = top

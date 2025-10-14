@@ -421,16 +421,28 @@ abstract class VexelElement<T : VexelElement<T>>(
     private fun applyXAlignment(baseX: Float, visibleParent: VexelElement<*>?, padding: FloatArray): Float {
         return when (xAlignment) {
             Alignment.None -> baseX
-            Alignment.Left -> if (visibleParent != null) visibleParent.x + padding[3] else 0f
-            Alignment.Right -> if (visibleParent != null) visibleParent.x + visibleParent.width - padding[1] - width else screenWidth - width
+            Alignment.Left -> {
+                val leftEdge = if (visibleParent != null) visibleParent.x + padding[3] else 0f
+                leftEdge + xConstraint
+            }
+            Alignment.Right -> {
+                val rightEdge = if (visibleParent != null) visibleParent.x + visibleParent.width - padding[1] else screenWidth.toFloat()
+                rightEdge - width + xConstraint
+            }
         }
     }
 
     private fun applyYAlignment(baseY: Float, visibleParent: VexelElement<*>?, padding: FloatArray): Float {
         return when (yAlignment) {
             Alignment.None -> baseY
-            Alignment.Left -> if (visibleParent != null) visibleParent.y + padding[0] else 0f
-            Alignment.Right -> if (visibleParent != null) visibleParent.y + visibleParent.height - padding[2] - height else screenHeight - height
+            Alignment.Left -> {
+                val topEdge = if (visibleParent != null) visibleParent.y + padding[0] else 0f
+                topEdge + yConstraint
+            }
+            Alignment.Right -> {
+                val bottomEdge = if (visibleParent != null) visibleParent.y + visibleParent.height - padding[2] else screenHeight.toFloat()
+                bottomEdge - height + yConstraint
+            }
         }
     }
 
