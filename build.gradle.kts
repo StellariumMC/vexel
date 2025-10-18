@@ -29,7 +29,7 @@ dependencies {
         exclude(group = "org.intellij")
         exclude(group = "org.jetbrains")
     })
-    modApi(shade("xyz.meowing:knit-${mcData}:106")!!)
+    modApi(shade("xyz.meowing:knit-${mcData}:107")!!)
 }
 
 toolkitMavenPublishing {
@@ -105,6 +105,6 @@ tasks.register<Exec>("publishToSonatype") {
         "curl", "-X", "POST",
         "-u", "${findProperty("sonatype.username")}:${findProperty("sonatype.password")}",
         "-F", "bundle=@${layout.buildDirectory.file("vexel:$version").get().asFile.absolutePath}",
-        "https://central.sonatype.com/api/v1/publisher/upload"
+        "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC"
     )
 }
