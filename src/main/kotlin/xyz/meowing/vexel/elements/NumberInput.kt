@@ -3,7 +3,7 @@ package xyz.meowing.vexel.elements
 import xyz.meowing.knit.api.input.KnitInputs
 import xyz.meowing.knit.api.input.KnitKeyboard
 import xyz.meowing.knit.api.input.KnitKeys
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.knit.api.KnitClient.client
 import xyz.meowing.vexel.components.core.Rectangle
 import xyz.meowing.vexel.components.core.Text
 import xyz.meowing.vexel.components.base.Pos
@@ -423,7 +423,7 @@ class NumberInput(
 
     private fun copySelection() {
         if (!hasSelection) return
-        mc.keyboard.clipboard = getSelectedText()
+        client.keyboard.clipboard = getSelectedText()
     }
 
     private fun cutSelection() {
@@ -433,7 +433,7 @@ class NumberInput(
     }
 
     private fun paste() {
-        val clipboardText = mc.keyboard.clipboard
+        val clipboardText = client.keyboard.clipboard
         if (clipboardText.isNotEmpty()) {
             insertText(clipboardText)
         }

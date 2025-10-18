@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+issueTrackerURL="https://github.com/StellariumMC/vexel/issues"
+license="GPL-3.0-or-later"
+
+[[mods]]
+modId="vexel"
+version="${mod_version}"
+displayName="${mod_name}"
+description="A simple declarative rendering library built with lwjgl's NanoVG Renderer"
+authors="Aurielyn, MrFast"
+
+[[dependencies.vexel]]
+modId="neoforge"
+mandatory=true
+versionRange="[20.2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.vexel]]
+modId="minecraft"
+mandatory=true
+versionRange="[${minor_mc_version},)"
+ordering="NONE"
+side="BOTH"

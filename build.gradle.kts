@@ -19,15 +19,15 @@ toolkitMultiversion {
     moveBuildsToRootProject.set(true)
 }
 
-toolkitLoomHelper {
-    useMixinRefMap(modData.id)
-}
-
 dependencies {
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${mcData.dependencies.fabric.fabricApiVersion}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
+    implementation(kotlin("stdlib-jdk8"))
 
-    modApi(include("xyz.meowing:knit-${mcData}:104")!!)
+    if (mcData.isFabric) {
+        modImplementation("net.fabricmc.fabric-api:fabric-api:${mcData.dependencies.fabric.fabricApiVersion}")
+        modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
+    }
+
+    modApi(include("xyz.meowing:knit-${mcData}:107")!!)
 
     val lwjglVersion = if (mcData.version <= MinecraftVersions.VERSION_1_20_1) "3.3.1" else "3.3.3"
     api(shade("org.lwjgl:lwjgl-nanovg:$lwjglVersion")!!)
@@ -104,6 +104,6 @@ tasks.register<Exec>("publishToSonatype") {
         "curl", "-X", "POST",
         "-u", "${findProperty("sonatype.username")}:${findProperty("sonatype.password")}",
         "-F", "bundle=@${layout.buildDirectory.file("vexel:$version").get().asFile.absolutePath}",
-        "https://central.sonatype.com/api/v1/publisher/upload"
+        "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC"
     )
 }

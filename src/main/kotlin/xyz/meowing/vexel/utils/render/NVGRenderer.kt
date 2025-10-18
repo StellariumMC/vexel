@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
-import xyz.meowing.vexel.Vexel.mc
+import xyz.meowing.knit.api.KnitClient.client
 import xyz.meowing.vexel.utils.style.Color.Companion.alpha
 import xyz.meowing.vexel.utils.style.Color.Companion.blue
 import xyz.meowing.vexel.utils.style.Color.Companion.green
@@ -44,7 +44,15 @@ object NVGRenderer {
     private val nvgColor2: NVGColor = NVGColor.malloc()
 
     val defaultFont =
-        Font("Default", mc.resourceManager.getResource(Identifier.of("vexel", "font.ttf")).get().inputStream)
+        Font("Default", client.resourceManager.getResource(
+            //#if MC <= 1.20.1 && FORGE-LIKE
+            //$$ net.minecraft.resources.ResourceLocation("vexel", "font.ttf")
+            //#elseif MC <= 1.20.1 && FABRIC
+            //$$ Identifier.of("vexel", "font.ttf")
+            //#else
+            Identifier.of("vexel", "font.ttf")
+            //#endif
+        ).get().inputStream)
 
     private val fontMap = HashMap<Font, NVGFont>()
     private val fontBounds = FloatArray(4)
@@ -70,19 +78,37 @@ object NVGRenderer {
 
         previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
 
-        val framebuffer = mc.framebuffer ?: return
+        val framebuffer = client.framebuffer ?: return
 
-        if (vg == -1L || framebuffer.colorAttachment == null) return
+        if (
+            vg == -1L ||
+            //#if MC <= 1.20.1 && FORGE-LIKE
+            //$$ framebuffer.colorTextureId == -1
+            //#elseif MC <= 1.20.1 && FABRIC
+            //$$ framebuffer.colorAttachment == null
+            //#else
+            framebuffer.colorAttachment == null
+            //#endif
+            ) return
 
         val glFramebuffer =
             //#if MC <= 1.20.1
-            //$$ framebuffer.fbo
+                //#if FORGE-LIKE
+                //$$ framebuffer.frameBufferId
+                //#else
+                //$$ framebuffer.fbo
+                //#endif
             //#else
             (framebuffer.colorAttachment as GlTexture).getOrCreateFramebuffer(
                 //#if MC >= 1.21.9
-                //$$ (RenderSystem.getDevice() as GlBackend).bufferManager,
+                    //#if FORGE-LIKE
+                    //$$ (RenderSystem.getDevice() as GlDevice).directStateAccess(),
+                    //#else
+                    //$$ (RenderSystem.getDevice() as GlBackend).bufferManager,
+                    //#endif
                 //#else
                 (RenderSystem.getDevice() as GlBackend).framebufferManager,
+
                 //#endif
                 null
             )
@@ -184,7 +210,11 @@ object NVGRenderer {
         if (previousProgram != -1) GL20.glUseProgram(previousProgram) // fixes invalid program errors when using NVG
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
         //#if MC <= 1.20.1
-        //$$ mc.framebuffer?.beginWrite(true)
+        //#if FORGE-LIKE
+        //$$ client.mainRenderTarget.bindWrite(true)
+        //#else
+        //$$ client.framebuffer?.beginWrite(true)
+        //#endif
         //#endif
         drawing = false
     }

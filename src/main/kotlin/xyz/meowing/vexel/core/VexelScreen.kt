@@ -1,7 +1,7 @@
 package xyz.meowing.vexel.core
 
+import xyz.meowing.knit.api.KnitClient
 import xyz.meowing.knit.api.screen.KnitScreen
-import xyz.meowing.vexel.Vexel
 import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -64,8 +64,8 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
 
     fun display() {
         Timer().schedule(50) {
-            Vexel.mc.execute {
-                Vexel.mc.setScreen(this@VexelScreen)
+            KnitClient.client.execute {
+                KnitClient.client.setScreen(this@VexelScreen)
             }
         }
     }
