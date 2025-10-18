@@ -14,26 +14,32 @@ Have questions? Join our [discord!](https://discord.gg/QHFWnydFXr)
 
 ## Installation
 
-Add Vexel to your `build.gradle.kts`:
+### Vexel Versions
 
-It is recommended that you use Deftu's Gradle Toolkit, visit [this page](https://github.com/StellariumMC/Forge1.8.9Template) for a Forge 1.8.9 Template.
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.8.9-forge?label=Vexel%201.8.9%20Forge)
+
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.20.1-fabric?label=Vexel%201.20.1%20Fabric)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.20.1-forge?label=Vexel%201.20.1%20Forge)
+
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.5-fabric?label=Vexel%201.21.5%20Fabric)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.5-forge?label=Vexel%201.21.5%20Forge)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.5-neoforge?label=Vexel%201.21.5%20NeoForge)
+
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.7-fabric?label=Vexel%201.21.7%20Fabric)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.7-forge?label=Vexel%201.21.7%20Forge)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.7-neoforge?label=Vexel%201.21.7%20NeoForge)
+
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.9-fabric?label=Vexel%201.21.9%20Fabric)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.9-neoforge?label=Vexel%201.21.9%20NeoForge)
+
+Add Vexel to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    // For Fabric 1.21.9
-    modImplementation(include("xyz.meowing:vexel-1.21.9-fabric:1.0.8")!!)
-
-    // For Fabric 1.21.7
-    modImplementation(include("xyz.meowing:vexel-1.21.7-fabric:1.0.8")!!)
-
-    // For Fabric 1.21.5
-    modImplementation(include("xyz.meowing:vexel-1.21.5-fabric:1.0.8")!!)
-
-    // For Fabric 1.20.1
-    modImplementation(include("xyz.meowing:vexel-1.20.1-fabric:1.0.8")!!)
-
-    // For Forge 1.8.9
-    shadowImpl("xyz.meowing:vexel-1.8.9-forge:1.0.8")
+    // mc-version: Your minecraft version, refer to the images above for the supported versions
+    // loader: Your mod loader, refer to the images above for the supported mod loaders
+    // version: The vexel version, use the number in the image above without the character "v", so like 106
+    modImplementation(include("xyz.meowing:vexel-<mc-version>-<loader>:<version>")!!)
 
     // ONLY FORGE 1.8.9 - In your ModInitializer class, call Vexel.init() like:
     class MyMod {
