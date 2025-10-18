@@ -30,6 +30,7 @@ Have questions? Join our [discord!](https://discord.gg/QHFWnydFXr)
 ![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.7-neoforge?label=Vexel%201.21.7%20NeoForge)
 
 ![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.9-fabric?label=Vexel%201.21.9%20Fabric)
+![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.9-forge?label=Vexel%201.21.9%20Forge)
 ![Maven Central Version](https://img.shields.io/maven-central/v/xyz.meowing/vexel-1.21.9-neoforge?label=Vexel%201.21.9%20NeoForge)
 
 Add Vexel to your `build.gradle.kts`:
