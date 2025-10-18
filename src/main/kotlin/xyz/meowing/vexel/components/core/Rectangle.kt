@@ -30,6 +30,11 @@ open class Rectangle(
     var gradientType: Gradient = Gradient.TopLeftToBottomRight
     var scrollOffset: Float = 0f
     var dropShadow: Boolean = false
+    var showScrollbar: Boolean = true
+    var scrollbarWidth: Float = 6f
+    var scrollbarColor: Int = 0xFF7c7c7d.toInt()
+    var scrollbarRadius: Float = 3f
+    var scrollbarPadding: Float = 0f
     var rotation: Float = 0f
 
     var shadowBlur = 30f
@@ -84,30 +89,27 @@ open class Rectangle(
     }
 
     private fun drawScrollbar() {
-        if (!scrollable) return
+        if (!scrollable || !showScrollbar) return
 
         val contentHeight = getContentHeight()
         val viewHeight = height - padding[0] - padding[2]
+        if (contentHeight <= viewHeight) return
 
-        if (contentHeight.roundToInt() <= viewHeight.roundToInt()) return
-
-        val scrollbarWidth = 6f
-        val scrollbarX = x + width - padding[1] - scrollbarWidth
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
-        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, 0xFF7c7c7d.toInt(), 3f)
+        NVGRenderer.rect(scrollbarX, scrollbarY, scrollbarWidth, scrollbarHeight, scrollbarColor, scrollbarRadius)
     }
 
     private fun isPointInScrollbar(mouseX: Float, mouseY: Float): Boolean {
-        if (!scrollable) return false
+        if (!scrollable || !showScrollbar) return false
 
         val contentHeight = getContentHeight()
         val viewHeight = height - padding[0] - padding[2]
-        if (contentHeight.roundToInt() <= viewHeight.roundToInt()) return false
+        if (contentHeight <= viewHeight) return false
 
-        val scrollbarWidth = 6f
-        val scrollbarX = x + width - padding[1] - scrollbarWidth
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
@@ -138,10 +140,21 @@ open class Rectangle(
 
         if (isHovered) mouseMoveListeners.forEach { it(mouseX, mouseY) }
 
-        children.reversed().forEach { child ->
-            if (scrollable && !isMouseOnVisible(mouseX, mouseY)) return@forEach
-            child.handleMouseMove(mouseX, adjustedMouseY)
+        children.reversed().forEach { child ->8
+            if (scrollable && !isMouseOnVisible(mouseX, mouseY)) {
+                unhoverRecursive(child, mouseX, adjustedMouseY)
+            } else {
+                child.handleMouseMove(mouseX, adjustedMouseY)
+            }
         }
+    }
+
+    private fun unhoverRecursive(element: VexelElement<*>, mouseX: Float, mouseY: Float) {
+        if (element.isHovered) {
+            element.isHovered = false
+            element.mouseExitListeners.forEach { it(mouseX, mouseY) }
+        }
+        element.children.forEach { unhoverRecursive(it, mouseX, mouseY) }
     }
 
     override fun handleMouseScroll(mouseX: Float, mouseY: Float, horizontal: Double, vertical: Double): Boolean {
@@ -272,10 +285,16 @@ open class Rectangle(
             when (current) {
                 is VexelElement<*> -> {
                     if (!current.visible) return false
-                    if (current is Rectangle && current.scrollable) {
-                        val centerX = getScreenX() + width / 2
-                        val centerY = getScreenY() + height / 2
-                        if (!current.isMouseOnVisible(centerX, centerY)) return false
+                    val centerX = getScreenX() + width / 2
+                    val centerY = getScreenY() + height / 2
+                    when (current) {
+                        is Container if current.scrollable -> {
+                            if (!current.isMouseOnVisible(centerX, centerY)) return false
+                        }
+
+                        is Rectangle if current.scrollable -> {
+                            if (!current.isMouseOnVisible(centerX, centerY)) return false
+                        }
                     }
                     current = current.parent
                 }
@@ -312,14 +331,13 @@ open class Rectangle(
             val contentY = y + padding[0]
             val viewWidth = width - padding[1] - padding[3]
             val viewHeight = height - padding[0] - padding[2]
-            val buffer = 2f
 
             NVGRenderer.push()
             NVGRenderer.pushScissor(
-                contentX - buffer,
-                contentY - buffer,
-                viewWidth + buffer * 2,
-                viewHeight + buffer * 2
+                contentX,
+                contentY,
+                viewWidth,
+                viewHeight
             )
             NVGRenderer.translate(0f, -scrollOffset)
         }
@@ -331,7 +349,7 @@ open class Rectangle(
             NVGRenderer.pop()
         }
 
-        if (isHovered || isDraggingScrollbar) drawScrollbar()
+        if (showScrollbar && (isHovered || isDraggingScrollbar)) drawScrollbar()
     }
 
     fun rotateTo(angle: Float, duration: Long = 300, type: EasingType = EasingType.EASE_OUT, onComplete: (() -> Unit)? = null): Rectangle {
@@ -353,6 +371,7 @@ open class Rectangle(
         var current = parent
         while (current != null) {
             when (current) {
+                is Container -> totalScrollOffset += current.scrollOffset
                 is Rectangle -> totalScrollOffset += current.scrollOffset
                 is VexelWindow -> break
             }
@@ -363,6 +382,26 @@ open class Rectangle(
 
     open fun scrollable(enabled: Boolean): Rectangle = apply {
         scrollable = enabled
+    }
+
+    open fun showScrollbar(show: Boolean): Rectangle = apply {
+        showScrollbar = show
+    }
+
+    open fun scrollbarWidth(width: Float): Rectangle = apply {
+        scrollbarWidth = width
+    }
+
+    open fun scrollbarColor(color: Int): Rectangle = apply {
+        scrollbarColor = color
+    }
+
+    open fun scrollbarRadius(radius: Float): Rectangle = apply {
+        scrollbarRadius = radius
+    }
+
+    open fun scrollbarPadding(padding: Float): Rectangle = apply {
+        scrollbarPadding = padding
     }
 
     open fun padding(top: Float = 0f, right: Float = 0f, bottom: Float = 0f, left: Float = 0f): Rectangle = apply {

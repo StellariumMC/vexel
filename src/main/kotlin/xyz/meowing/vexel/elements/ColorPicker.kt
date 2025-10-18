@@ -196,12 +196,14 @@ private class ColorPickerPanel(
 
     val hueSlider = HueSlider()
         .setSizing(20f, Size.Pixels, 95f, Size.ParentPerc)
-        .setPositioning(5f, Pos.AfterSibling, 0f, Pos.ParentCenter)
+        .setPositioning(Pos.AfterSibling, Pos.ParentCenter)
+        .setOffset(5f, 0f)
         .childOf(background)
 
     val alphaSlider = AlphaSlider()
         .setSizing(20f, Size.Pixels, 95f, Size.ParentPerc)
-        .setPositioning(5f, Pos.AfterSibling, 0f, Pos.ParentCenter)
+        .setPositioning(Pos.AfterSibling, Pos.ParentCenter)
+        .setOffset(5f, 0f)
         .childOf(background)
 
     init {
