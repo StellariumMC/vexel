@@ -19,6 +19,21 @@ toolkitMultiversion {
     moveBuildsToRootProject.set(true)
 }
 
+toolkitLoomHelper {
+    if (!mcData.isNeoForge) {
+        useMixinRefMap(modData.id)
+    }
+
+    if (mcData.isForge) {
+        useTweaker("org.spongepowered.asm.launch.MixinTweaker")
+        useForgeMixin(modData.id)
+    }
+
+    if (mcData.isForgeLike && mcData.version >= MinecraftVersions.VERSION_1_16_5) {
+        useKotlinForForge()
+    }
+}
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
@@ -27,7 +42,7 @@ dependencies {
         modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
     }
 
-    modApi(include("xyz.meowing:knit-${mcData}:107")!!)
+    modApi(include("xyz.meowing:knit-$mcData:109")!!)
 
     val lwjglVersion = if (mcData.version <= MinecraftVersions.VERSION_1_20_1) "3.3.1" else "3.3.3"
     api(shade("org.lwjgl:lwjgl-nanovg:$lwjglVersion")!!)

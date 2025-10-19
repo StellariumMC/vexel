@@ -1,7 +1,10 @@
 package xyz.meowing.vexel.core
 
+import net.minecraft.client.gui.DrawContext
 import xyz.meowing.knit.api.KnitClient
+import xyz.meowing.knit.api.events.EventBus
 import xyz.meowing.knit.api.screen.KnitScreen
+import xyz.meowing.vexel.events.GuiEvent
 import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -15,6 +18,12 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
     val window = VexelWindow()
 
     open fun afterInitialization() {}
+
+    init {
+        EventBus.register<GuiEvent.Render> {
+            if (KnitClient.client.currentScreen == this) window.draw()
+        }
+    }
 
     final override fun onInitGui() {
         if (!hasInitialized) {
@@ -38,10 +47,6 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
         window.onWindowResize()
     }
 
-    override fun onRender() {
-        window.draw()
-    }
-
     override fun onMouseClick(mouseX: Int, mouseY: Int, button: Int) {
         window.mouseClick(button)
     }
@@ -50,7 +55,7 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
         window.mouseRelease(button)
     }
 
-    override fun onMouseMove() {
+    override fun onMouseMove(mouseX: Int, mouseY: Int) {
         window.mouseMove()
     }
 

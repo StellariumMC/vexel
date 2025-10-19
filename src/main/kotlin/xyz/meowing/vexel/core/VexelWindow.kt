@@ -21,10 +21,8 @@ class VexelWindow {
 
     fun draw() {
         NVGRenderer.beginFrame(KnitResolution.windowWidth.toFloat(), KnitResolution.windowHeight.toFloat())
-        NVGRenderer.push()
         children.forEach { it.render(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat()) }
         AnimationManager.update()
-        NVGRenderer.pop()
         NVGRenderer.endFrame()
     }
 
