@@ -5,8 +5,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.meowing.knit.api.events.EventBus;
 import xyz.meowing.vexel.events.GuiEvent;
+
+import static xyz.meowing.vexel.Vexel.getEventBus;
 
 //#if MC > 1.20.1
 import net.minecraft.client.render.RenderTickCounter;
@@ -25,7 +26,6 @@ public class MixinGameRenderer {
     //#elseif MC == 1.20.1
     //$$ public void hookRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
     //#endif
-        if (EventBus.INSTANCE.post(new GuiEvent.Render()))
-            ci.cancel();
+        if (getEventBus().post(new GuiEvent.Render())) ci.cancel();
     }
 }

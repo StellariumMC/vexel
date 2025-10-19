@@ -1,9 +1,8 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.gui.DrawContext
 import xyz.meowing.knit.api.KnitClient
-import xyz.meowing.knit.api.events.EventBus
 import xyz.meowing.knit.api.screen.KnitScreen
+import xyz.meowing.vexel.Vexel.eventBus
 import xyz.meowing.vexel.events.GuiEvent
 import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.util.Timer
@@ -20,7 +19,7 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
     open fun afterInitialization() {}
 
     init {
-        EventBus.register<GuiEvent.Render> {
+        eventBus.register<GuiEvent.Render> {
             if (KnitClient.client.currentScreen == this) window.draw()
         }
     }

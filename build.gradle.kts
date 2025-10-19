@@ -42,7 +42,7 @@ dependencies {
         modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
     }
 
-    modApi(include("xyz.meowing:knit-$mcData:109")!!)
+    modApi(include("xyz.meowing:knit-$mcData:110")!!)
 
     val lwjglVersion = if (mcData.version <= MinecraftVersions.VERSION_1_20_1) "3.3.1" else "3.3.3"
     api(shade("org.lwjgl:lwjgl-nanovg:$lwjglVersion")!!)
