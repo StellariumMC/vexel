@@ -42,7 +42,7 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
         window.onWindowResize()
     }
 
-    override fun onRender() {
+    override fun onRender(mouseX: Int, mouseY: Int, deltaTicks: Float) {
         window.draw()
     }
 
@@ -54,7 +54,7 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
         window.mouseRelease(button)
     }
 
-    override fun onMouseMove() {
+    override fun onMouseMove(mouseX: Int, mouseY: Int) {
         window.mouseMove()
     }
 
