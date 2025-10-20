@@ -26,7 +26,7 @@ class Button(
     widthType: Size = Size.Auto,
     heightType: Size = Size.Auto
 ) : VexelElement<Button>(widthType, heightType) {
-    private val background = Rectangle(
+    val background = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,

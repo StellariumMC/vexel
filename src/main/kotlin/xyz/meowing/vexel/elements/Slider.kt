@@ -37,36 +37,36 @@ class Slider(
     widthType: Size = Size.Pixels,
     heightType: Size = Size.Pixels
 ) : VexelElement<Slider>(widthType, heightType) {
-    private var isDragging = false
+    var isDragging = false
     private var dragStartX = 0f
     private var dragStartValue = 0f
     private var globalMoveListener: ((Float, Float) -> Unit)? = null
     private var globalReleaseListener: ((Float, Float, Int) -> Boolean)? = null
     private val separators: MutableList<Rectangle> = mutableListOf()
 
-    private val container = Rectangle(backgroundColor, borderColor, borderRadius, borderThickness, padding, hoverColor, pressedColor, Size.ParentPerc, Size.ParentPerc)
+    val container = Rectangle(backgroundColor, borderColor, borderRadius, borderThickness, padding, hoverColor, pressedColor, Size.ParentPerc, Size.ParentPerc)
         .setSizing(100f, Size.ParentPerc, 100f, Size.ParentPerc)
         .ignoreMouseEvents()
         .childOf(this)
 
-    private val trackBackground = Rectangle(trackColor, 0x00000000, trackRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.ParentPerc, Size.Pixels)
+    val trackBackground = Rectangle(trackColor, 0x00000000, trackRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.ParentPerc, Size.Pixels)
         .setSizing(100f, Size.ParentPerc, trackHeight, Size.Pixels)
         .setPositioning(0f, Pos.ParentPixels, 0f, Pos.ParentCenter)
         .ignoreMouseEvents()
         .childOf(container)
 
-    private val stepContainer = Rectangle(0x00000000, 0x00000000, 0f, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.ParentPerc, Size.ParentPerc)
+    val stepContainer = Rectangle(0x00000000, 0x00000000, 0f, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.ParentPerc, Size.ParentPerc)
         .setSizing(100f, Size.ParentPerc, 100f, Size.ParentPerc)
         .ignoreMouseEvents()
         .childOf(container)
 
-    private val trackFill = Rectangle(trackFillColor, 0x00000000, trackRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.Pixels, Size.Pixels)
+    val trackFill = Rectangle(trackFillColor, 0x00000000, trackRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.Pixels, Size.Pixels)
         .setSizing(0f, Size.Pixels, trackHeight, Size.Pixels)
         .setPositioning(0f, Pos.ParentPixels, 0f, Pos.ParentCenter)
         .ignoreMouseEvents()
         .childOf(container)
 
-    private val thumb = Rectangle(thumbColor, 0x00000000, thumbRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), thumbHoverColor, thumbPressedColor, Size.Pixels, Size.Pixels)
+    val thumb = Rectangle(thumbColor, 0x00000000, thumbRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), thumbHoverColor, thumbPressedColor, Size.Pixels, Size.Pixels)
         .setSizing(thumbWidth, Size.Pixels, thumbHeight, Size.Pixels)
         .setPositioning(0f, Pos.ParentPixels, 0f, Pos.ParentCenter)
         .ignoreMouseEvents()
@@ -122,7 +122,7 @@ class Slider(
         }
     }
 
-    private fun startDragging(mouseX: Float) {
+    fun startDragging(mouseX: Float) {
         isDragging = true
         dragStartX = mouseX
         dragStartValue = value
@@ -150,7 +150,7 @@ class Slider(
         }
     }
 
-    private fun stopDragging() {
+    fun stopDragging() {
         isDragging = false
         globalMoveListener = null
         globalReleaseListener = null

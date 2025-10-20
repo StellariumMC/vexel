@@ -22,7 +22,7 @@ class Keybind(
     var selectedScanId: Int? = null
     var listen: Boolean = false
 
-    private val background = Rectangle(
+    val background = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,
@@ -37,7 +37,7 @@ class Keybind(
         .ignoreMouseEvents()
         .childOf(this)
 
-    private val innerText = Text("Key A", 0xFFFFFFFF.toInt(), 12f)
+    val innerText = Text("Key A", 0xFFFFFFFF.toInt(), 12f)
         .setPositioning(Pos.ParentCenter, Pos.ParentCenter)
         .childOf(background)
 

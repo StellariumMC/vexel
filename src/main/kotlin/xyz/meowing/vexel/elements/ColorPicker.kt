@@ -26,11 +26,11 @@ class ColorPicker(
     heightType: Size = Size.Pixels
 ) : VexelElement<ColorPicker>(widthType, heightType) {
     var selectedColor: Color = initialColor
-    private var isPickerOpen = false
-    private var isAnimating = false
+    var isPickerOpen = false
+    var isAnimating = false
     private var lastPosition = Pair(0f, 0f)
 
-    private val previewRect = Rectangle(
+    val previewRect = Rectangle(
         selectedColor.rgb,
         borderColor,
         borderRadius,
@@ -45,7 +45,7 @@ class ColorPicker(
         .ignoreMouseEvents()
         .childOf(this)
 
-    private var pickerPanel: ColorPickerPanel? = null
+    var pickerPanel: ColorPickerPanel? = null
 
     init {
         setSizing(30f, Size.Pixels, 20f, Size.Pixels)
@@ -57,11 +57,11 @@ class ColorPicker(
         }
     }
 
-    private fun togglePicker() {
+    fun togglePicker() {
         if (isPickerOpen) closePicker() else openPicker()
     }
 
-    private fun openPicker() {
+    fun openPicker() {
         if (isPickerOpen || isAnimating) return
         isAnimating = true
 
@@ -97,7 +97,7 @@ class ColorPicker(
         isPickerOpen = true
     }
 
-    private fun closePicker() {
+    fun closePicker() {
         if (!isPickerOpen || pickerPanel == null || isAnimating) return
         isAnimating = true
 
@@ -169,20 +169,20 @@ class ColorPicker(
     }
 }
 
-private class ColorPickerPanel(
+class ColorPickerPanel(
     initialColor: Color,
     backgroundColor: Int = 0xFF171616.toInt(),
     borderColor: Int = 0xFF505050.toInt(),
     private val sourceColorPicker: Rectangle
 ) : VexelElement<ColorPickerPanel>() {
-    private var currentColor = initialColor
-    private var currentHue: Float
-    private var currentSaturation: Float
-    private var currentBrightness: Float
-    private var currentAlpha = initialColor.alpha / 255f
-    private var draggingPicker = false
-    private var draggingHue = false
-    private var draggingAlpha = false
+    var currentColor = initialColor
+    var currentHue: Float
+    var currentSaturation: Float
+    var currentBrightness: Float
+    var currentAlpha = initialColor.alpha / 255f
+    var draggingPicker = false
+    var draggingHue = false
+    var draggingAlpha = false
 
     val background = Rectangle(backgroundColor, borderColor, 2f, 1f, floatArrayOf(8f, 8f, 8f, 8f))
         .setSizing(0f, Size.Auto, 170f, Size.Pixels)

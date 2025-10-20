@@ -30,7 +30,7 @@ class Switch(
 ) : VexelElement<Switch>(widthType, heightType) {
     var enabled: Boolean = false
     
-    private val track = Rectangle(
+    val track = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,
@@ -45,7 +45,7 @@ class Switch(
         .ignoreMouseEvents()
         .childOf(this)
     
-    private val thumb = Rectangle(thumbColor, 0x00000000, thumbRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.Pixels, Size.Pixels)
+    val thumb = Rectangle(thumbColor, 0x00000000, thumbRadius, 0f, floatArrayOf(0f, 0f, 0f, 0f), null, null, Size.Pixels, Size.Pixels)
         .ignoreMouseEvents()
         .childOf(track)
     

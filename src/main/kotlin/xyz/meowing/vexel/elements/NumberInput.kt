@@ -44,13 +44,13 @@ class NumberInput(
 
     var numberValue = 0f
 
-    private var isDragging = false
-    private var caretVisible = true
-    private var lastBlink = System.currentTimeMillis()
-    private val caretBlinkRate = 500L
+    var isDragging = false
+    var lastBlink = System.currentTimeMillis()
+        private set
+    var caretBlinkRate = 500L
 
-    private var cursorIndex = stringValue.length
-    private var selectionAnchor = stringValue.length
+    var cursorIndex = stringValue.length
+    var selectionAnchor = stringValue.length
 
     private val selectionStart: Int get() = min(cursorIndex, selectionAnchor)
     private val selectionEnd: Int get() = max(cursorIndex, selectionAnchor)
@@ -59,8 +59,9 @@ class NumberInput(
     var scrollOffset = 0f
     private var lastClickTime = 0L
     private var clickCount = 0
+    private var caretVisible = true
 
-    private val background = Rectangle(
+    val background = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,
@@ -75,18 +76,18 @@ class NumberInput(
         .ignoreMouseEvents()
         .childOf(this)
 
-    private val innerText = Text(placeholder, textColor, fontSize)
+    val innerText = Text(placeholder, textColor, fontSize)
         .setPositioning(Pos.ParentPixels, Pos.ParentCenter)
         .childOf(background)
 
-    private val selectionRectangle = Rectangle(selectionColor, 0x00000000, 0f, 0f)
+    val selectionRectangle = Rectangle(selectionColor, 0x00000000, 0f, 0f)
         .setPositioning(Pos.ParentPixels, Pos.ParentCenter)
         .setSizing(Size.Pixels, Size.Pixels)
         .ignoreMouseEvents()
         .ignoreFocus()
         .childOf(background)
 
-    private val caret = Rectangle(0xFFFFFFFF.toInt(), 0xFF000000.toInt(), 1f, 0f)
+    val caret = Rectangle(0xFFFFFFFF.toInt(), 0xFF000000.toInt(), 1f, 0f)
         .setPositioning(Pos.ParentPixels, Pos.ParentCenter)
         .setSizing(Size.Pixels, Size.Pixels)
         .ignoreMouseEvents()
@@ -250,12 +251,12 @@ class NumberInput(
         return true
     }
 
-    private fun resetCaretBlink() {
+    fun resetCaretBlink() {
         lastBlink = System.currentTimeMillis()
         caretVisible = true
     }
 
-    private fun getCharIndexAtAbsX(absClickX: Float): Int {
+    fun getCharIndexAtAbsX(absClickX: Float): Int {
         if (absClickX <= 0) return 0
         var currentWidth = 0f
         for (i in stringValue.indices) {
@@ -268,7 +269,7 @@ class NumberInput(
         return stringValue.length
     }
 
-    private fun selectWordAt(pos: Int) {
+    fun selectWordAt(pos: Int) {
         if (stringValue.isEmpty()) return
         val currentPos = pos.coerceIn(0, stringValue.length)
 
@@ -286,7 +287,7 @@ class NumberInput(
         ensureCaretVisible()
     }
 
-    private fun insertText(text: String) {
+    fun insertText(text: String) {
         val builder = StringBuilder(stringValue)
         val newCursorPos = if (!hasSelection) cursorIndex
         else {
@@ -304,7 +305,7 @@ class NumberInput(
         resetCaretBlink()
     }
 
-    private fun deleteChar(direction: Int) {
+    fun deleteChar(direction: Int) {
         var textChanged = false
         var newText = stringValue
         var newCursor = cursorIndex
@@ -346,7 +347,7 @@ class NumberInput(
         resetCaretBlink()
     }
 
-    private fun moveCaret(amount: Int, shiftHeld: Boolean) {
+    fun moveCaret(amount: Int, shiftHeld: Boolean) {
         cursorIndex = (cursorIndex + amount).coerceIn(0, stringValue.length)
         if (!shiftHeld) {
             selectionAnchor = cursorIndex
@@ -355,7 +356,7 @@ class NumberInput(
         resetCaretBlink()
     }
 
-    private fun moveCaretTo(position: Int, shiftHeld: Boolean) {
+    fun moveCaretTo(position: Int, shiftHeld: Boolean) {
         cursorIndex = position.coerceIn(0, stringValue.length)
         if (!shiftHeld) {
             selectionAnchor = cursorIndex
@@ -364,7 +365,7 @@ class NumberInput(
         resetCaretBlink()
     }
 
-    private fun moveWord(direction: Int, shiftHeld: Boolean) {
+    fun moveWord(direction: Int, shiftHeld: Boolean) {
         cursorIndex = findWordBoundary(cursorIndex, direction)
         if (!shiftHeld) {
             selectionAnchor = cursorIndex
@@ -373,7 +374,7 @@ class NumberInput(
         resetCaretBlink()
     }
 
-    private fun findWordBoundary(startIndex: Int, direction: Int): Int {
+    fun findWordBoundary(startIndex: Int, direction: Int): Int {
         var i = startIndex
         val len = stringValue.length
         if (direction < 0) {
@@ -387,7 +388,7 @@ class NumberInput(
         return i.coerceIn(0, len)
     }
 
-    private fun deletePrevWord() {
+    fun deletePrevWord() {
         if (hasSelection) {
             deleteChar(0)
             return
@@ -399,7 +400,7 @@ class NumberInput(
         deleteChar(0)
     }
 
-    private fun deleteNextWord() {
+    fun deleteNextWord() {
         if (hasSelection) {
             deleteChar(0)
             return
@@ -411,28 +412,28 @@ class NumberInput(
         deleteChar(0)
     }
 
-    private fun selectAll() {
+    fun selectAll() {
         selectionAnchor = 0
         cursorIndex = stringValue.length
         resetCaretBlink()
     }
 
-    private fun getSelectedText(): String {
+    fun getSelectedText(): String {
         return if (hasSelection) stringValue.substring(selectionStart, selectionEnd) else ""
     }
 
-    private fun copySelection() {
+    fun copySelection() {
         if (!hasSelection) return
         GuiScreen.setClipboardString(getSelectedText())
     }
 
-    private fun cutSelection() {
+    fun cutSelection() {
         if (!hasSelection) return
         copySelection()
         deleteChar(0)
     }
 
-    private fun paste() {
+    fun paste() {
         val clipboardText = GuiScreen.getClipboardString()
         if (clipboardText.isNotEmpty()) {
             insertText(clipboardText)
