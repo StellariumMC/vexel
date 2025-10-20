@@ -47,7 +47,7 @@ class NumberInput(
     var isDragging = false
     var lastBlink = System.currentTimeMillis()
         private set
-    val caretBlinkRate = 500L
+    var caretBlinkRate = 500L
 
     var cursorIndex = stringValue.length
     var selectionAnchor = stringValue.length
@@ -440,7 +440,7 @@ class NumberInput(
         }
     }
 
-    fun ensureCaretVisible() {
+    private fun ensureCaretVisible() {
         val caretXAbsolute = NVGRenderer.textWidth(stringValue.substring(0, cursorIndex.coerceIn(0, stringValue.length)), fontSize, NVGRenderer.defaultFont).toInt()
         val visibleTextStart = scrollOffset
         val visibleTextEnd = scrollOffset + (width * 2)
