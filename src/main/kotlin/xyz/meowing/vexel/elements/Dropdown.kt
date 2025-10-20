@@ -28,6 +28,10 @@ class Dropdown(
     heightType: Size = Size.Pixels
 ) : VexelElement<Dropdown>(widthType, heightType) {
     var fontSize = 12f
+    var borderColorStart = 0xFF0194d8.toInt()
+    var borderColorEnd = 0xFF062897.toInt()
+    var selectedTextColor = 0xFFFFFFFF.toInt()
+    var dropdownIconPath = "/assets/vexel/dropdown.svg"
     private var isPickerOpen = false
     private var isAnimating = false
     private var lastPosition = Pair(0f, 0f)
@@ -45,16 +49,17 @@ class Dropdown(
     )
         .setSizing(100f, Size.ParentPerc, 100f, Size.ParentPerc)
         .ignoreMouseEvents()
-        .setGradientBorderColor(0xFF0194d8.toInt(), 0xFF062897.toInt())
+        .setBorderGradientColor(borderColorStart, borderColorEnd)
         .childOf(this)
 
-    private val selectedText = Text(options[selectedIndex], 0xFFFFFFFF.toInt(), fontSize)
+    private val selectedText = Text(options[selectedIndex], selectedTextColor, fontSize)
         .setPositioning(Pos.ParentPixels, Pos.ParentCenter)
         .childOf(previewRect)
 
-    val dropdownArrow = SvgImage(svgPath = "/assets/vexel/dropdown.svg", color = Color(iconColor))
+    val dropdownArrow = SvgImage(svgPath = dropdownIconPath, color = Color(iconColor))
         .setSizing(20f, Size.Pixels, 20f, Size.Pixels)
-        .setPositioning(80f, Pos.ParentPercent, 0f, Pos.ParentCenter)
+        .setPositioning(5f, Pos.ParentPixels, 0f, Pos.ParentCenter)
+        .alignRight()
         .childOf(previewRect)
 
     private var pickerPanel: DropDownPanel? = null
@@ -163,6 +168,19 @@ class Dropdown(
     fun fontSize(size: Float): Dropdown = apply {
         fontSize = size
         selectedText.fontSize = size
+    }
+
+    fun setBorderGradient(color1: Int, color2: Int) {
+        borderColorStart = color1
+        borderColorEnd = color2
+    }
+
+    fun selectedTextColor(color: Int) {
+        selectedTextColor = color
+    }
+
+    fun setArrowIconPath(path: String) {
+        dropdownIconPath = path
     }
 }
 
