@@ -28,7 +28,7 @@ class CheckBox(
 ) : VexelElement<CheckBox>(widthType, heightType) {
     var checked: Boolean = false
 
-    private val background = Rectangle(
+    val background = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,

@@ -32,11 +32,11 @@ class Dropdown(
     var borderColorEnd = 0xFF062897.toInt()
     var selectedTextColor = 0xFFFFFFFF.toInt()
     var dropdownIconPath = "/assets/vexel/dropdown.svg"
-    private var isPickerOpen = false
-    private var isAnimating = false
+    var isPickerOpen = false
+    var isAnimating = false
     private var lastPosition = Pair(0f, 0f)
 
-    private val previewRect = Rectangle(
+    val previewRect = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,
@@ -52,7 +52,7 @@ class Dropdown(
         .setBorderGradientColor(borderColorStart, borderColorEnd)
         .childOf(this)
 
-    private val selectedText = Text(options[selectedIndex], selectedTextColor, fontSize)
+    val selectedText = Text(options[selectedIndex], selectedTextColor, fontSize)
         .setPositioning(Pos.ParentPixels, Pos.ParentCenter)
         .childOf(previewRect)
 
@@ -62,7 +62,7 @@ class Dropdown(
         .alignRight()
         .childOf(previewRect)
 
-    private var pickerPanel: DropDownPanel? = null
+    var pickerPanel: DropDownPanel? = null
 
     init {
         setSizing(180f, Size.Pixels, 0f, Size.Auto)
@@ -74,11 +74,11 @@ class Dropdown(
         }
     }
 
-    private fun togglePicker() {
+    fun togglePicker() {
         if (isPickerOpen) closePicker() else openPicker()
     }
 
-    private fun openPicker() {
+    fun openPicker() {
         if (isPickerOpen || isAnimating) return
         isAnimating = true
 
@@ -115,7 +115,7 @@ class Dropdown(
         return previewRect.getAutoHeight()
     }
 
-    private fun closePicker() {
+    fun closePicker() {
         if (!isPickerOpen || pickerPanel == null || isAnimating) return
         isAnimating = true
 

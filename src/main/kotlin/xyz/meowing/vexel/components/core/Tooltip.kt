@@ -15,7 +15,7 @@ class Tooltip(
     widthType: Size = Size.Auto,
     heightType: Size = Size.Auto
 ) : VexelElement<Tooltip>(widthType, heightType) {
-    private val backgroundRect = Rectangle(
+    val backgroundRect = Rectangle(
         backgroundColor,
         borderColor,
         borderRadius,
