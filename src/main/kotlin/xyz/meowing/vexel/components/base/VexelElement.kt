@@ -361,16 +361,16 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     private fun computeAfterSiblingX(visibleParent: VexelElement<*>?): Float {
-        val parentElement = parent as? VexelElement<*> ?: return 0f
+        val parentElement = parent as? VexelElement<*> ?: return xConstraint
 
         val padding = getParentPadding()
         val index = parentElement.children.indexOf(this)
         if (index <= 0) {
-            return if (visibleParent != null) visibleParent.x + padding[3] else 0f
+            return if (visibleParent != null) visibleParent.x + padding[3] + xConstraint else xConstraint
         }
 
         val prev = parentElement.children[index - 1]
-        return prev.x + prev.width
+        return prev.x + prev.width + xConstraint
     }
 
     private fun computeMatchSiblingX(): Float {

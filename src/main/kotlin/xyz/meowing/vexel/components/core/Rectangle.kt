@@ -5,13 +5,11 @@ import xyz.meowing.vexel.animations.animateFloat
 import xyz.meowing.vexel.animations.fadeIn
 import xyz.meowing.vexel.animations.fadeOut
 import xyz.meowing.vexel.core.VexelWindow
-import xyz.meowing.vexel.components.base.Pos
 import xyz.meowing.vexel.components.base.Size
 import xyz.meowing.vexel.components.base.VexelElement
 import xyz.meowing.vexel.utils.render.NVGRenderer
 import xyz.meowing.vexel.utils.style.Gradient
 import java.awt.Color
-import kotlin.math.roundToInt
 
 open class Rectangle(
     var backgroundColor: Int = 0x80000000.toInt(),
@@ -423,7 +421,7 @@ open class Rectangle(
         secondBackgroundColor = color2
     }
 
-    open fun setGradientBorderColor(color1: Int, color2: Int): Rectangle = apply {
+    open fun setBorderGradientColor(color1: Int, color2: Int): Rectangle = apply {
         borderColor = color1
         secondBorderColor = color2
     }
