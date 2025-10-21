@@ -17,6 +17,8 @@ open class Container(
     var scrollbarColor: Int = 0xFF7c7c7d.toInt()
     var scrollbarRadius: Float = 3f
     var scrollbarPadding: Float = 0f
+    var scrollbarIgnorePadding: Boolean = false
+    var scrollbarCustomPadding: Float = 0f
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
 
@@ -28,7 +30,8 @@ open class Container(
         val viewHeight = height - padding[0] - padding[2]
         if (contentHeight <= viewHeight) return
 
-        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
+        val scrollbarPaddingValue = if (scrollbarIgnorePadding) scrollbarCustomPadding else scrollbarPadding
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPaddingValue
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
@@ -41,7 +44,8 @@ open class Container(
         val viewHeight = height - padding[0] - padding[2]
         if (contentHeight <= viewHeight) return false
 
-        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
+        val scrollbarPaddingValue = if (scrollbarIgnorePadding) scrollbarCustomPadding else scrollbarPadding
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPaddingValue
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
@@ -301,6 +305,14 @@ open class Container(
 
     open fun scrollbarPadding(padding: Float): Container = apply {
         scrollbarPadding = padding
+    }
+
+    open fun scrollbarIgnorePadding(ignore: Boolean): Container = apply {
+        scrollbarIgnorePadding = ignore
+    }
+
+    open fun scrollbarCustomPadding(padding: Float): Container = apply {
+        scrollbarCustomPadding = padding
     }
 
     open fun padding(top: Float = 0f, right: Float = 0f, bottom: Float = 0f, left: Float = 0f): Container = apply {

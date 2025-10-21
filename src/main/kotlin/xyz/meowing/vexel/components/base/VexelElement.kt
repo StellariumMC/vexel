@@ -223,6 +223,30 @@ abstract class VexelElement<T : VexelElement<T>>(
         }
     }
 
+    private fun getSiblingsAfterWidth(): Float {
+        val parentElement = parent as? VexelElement<*> ?: return 0f
+        val myIndex = parentElement.children.indexOf(this)
+        if (myIndex == -1) return 0f
+
+        return parentElement.children
+            .drop(myIndex + 1)
+            .filter { it.visible && !it.isFloating }
+            .sumOf { it.width.toDouble() }
+            .toFloat()
+    }
+
+    private fun getSiblingsAfterHeight(): Float {
+        val parentElement = parent as? VexelElement<*> ?: return 0f
+        val myIndex = parentElement.children.indexOf(this)
+        if (myIndex == -1) return 0f
+
+        return parentElement.children
+            .drop(myIndex + 1)
+            .filter { it.visible && !it.isFloating }
+            .sumOf { it.height.toDouble() }
+            .toFloat()
+    }
+
     open fun updateWidth() {
         if (cache.sizeCacheValid) {
             width = cache.cachedWidth
@@ -249,7 +273,8 @@ abstract class VexelElement<T : VexelElement<T>>(
                 } else {
                     val padding = getParentPadding()
                     val parentRightEdge = parentElement.x + parentElement.width - padding[1]
-                    (parentRightEdge - x).coerceAtLeast(0f)
+                    val siblingWidth = getSiblingsAfterWidth()
+                    (parentRightEdge - x - siblingWidth).coerceAtLeast(0f)
                 }
             }
         }
@@ -283,7 +308,8 @@ abstract class VexelElement<T : VexelElement<T>>(
                 } else {
                     val padding = getParentPadding()
                     val parentBottomEdge = parentElement.y + parentElement.height - padding[2]
-                    (parentBottomEdge - y).coerceAtLeast(0f)
+                    val siblingHeight = getSiblingsAfterHeight()
+                    (parentBottomEdge - y - siblingHeight).coerceAtLeast(0f)
                 }
             }
         }

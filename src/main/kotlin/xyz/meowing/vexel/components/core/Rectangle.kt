@@ -33,6 +33,8 @@ open class Rectangle(
     var scrollbarColor: Int = 0xFF7c7c7d.toInt()
     var scrollbarRadius: Float = 3f
     var scrollbarPadding: Float = 0f
+    var scrollbarIgnorePadding: Boolean = false
+    var scrollbarCustomPadding: Float = 0f
     var rotation: Float = 0f
 
     var shadowBlur = 30f
@@ -92,7 +94,8 @@ open class Rectangle(
         val viewHeight = height - padding[0] - padding[2]
         if (contentHeight <= viewHeight) return
 
-        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
+        val scrollbarPaddingValue = if (scrollbarIgnorePadding) scrollbarCustomPadding else scrollbarPadding
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPaddingValue
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
@@ -105,7 +108,8 @@ open class Rectangle(
         val viewHeight = height - padding[0] - padding[2]
         if (contentHeight <= viewHeight) return false
 
-        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPadding
+        val scrollbarPaddingValue = if (scrollbarIgnorePadding) scrollbarCustomPadding else scrollbarPadding
+        val scrollbarX = x + width - padding[1] - scrollbarWidth - scrollbarPaddingValue
         val scrollbarHeight = (viewHeight / contentHeight) * viewHeight
         val scrollbarY = y + padding[0] + (scrollOffset / contentHeight) * viewHeight
 
@@ -447,6 +451,14 @@ open class Rectangle(
 
     open fun scrollbarPadding(padding: Float): Rectangle = apply {
         scrollbarPadding = padding
+    }
+
+    open fun scrollbarIgnorePadding(ignore: Boolean): Rectangle = apply {
+        scrollbarIgnorePadding = ignore
+    }
+
+    open fun scrollbarCustomPadding(padding: Float): Rectangle = apply {
+        scrollbarCustomPadding = padding
     }
 
     open fun width(newWidth: Float): Rectangle = apply {
