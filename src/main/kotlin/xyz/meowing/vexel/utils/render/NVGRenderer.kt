@@ -310,16 +310,19 @@ object NVGRenderer {
         NanoVG.nvgText(vg, x, y + .5f, text)
     }
 
-    fun textShadow(text: String, x: Float, y: Float, size: Float, color: Int, font: Font = defaultFont) {
+    fun textShadow(text: String, x: Float, y: Float, size: Float, color: Int, font: Font = defaultFont, shadowColor: Int = 0x80000000.toInt(), offsetX: Float = 1.5f, offsetY: Float = 1.5f, blur: Float = 2f) {
         NanoVG.nvgFontFaceId(vg, getFontID(font))
         NanoVG.nvgFontSize(vg, size)
-        color(-16777216)
-        NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgText(vg, round(x + 3f), round(y + 3f), text)
 
+        NanoVG.nvgFontBlur(vg, blur)
+        color(shadowColor)
+        NanoVG.nvgFillColor(vg, nvgColor)
+        NanoVG.nvgText(vg, x + offsetX, y + offsetY, text)
+
+        NanoVG.nvgFontBlur(vg, 0f)
         color(color)
         NanoVG.nvgFillColor(vg, nvgColor)
-        NanoVG.nvgText(vg, round(x), round(y), text)
+        NanoVG.nvgText(vg, x, y + .5f, text)
     }
 
     fun textWidth(text: String, size: Float, font: Font): Float {
