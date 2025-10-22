@@ -29,7 +29,7 @@ dependencies {
         exclude(group = "org.intellij")
         exclude(group = "org.jetbrains")
     })
-    modApi(shade("xyz.meowing:knit-${mcData}:110")!!)
+    modApi(shade("xyz.meowing:knit-${mcData}:111")!!)
 }
 
 toolkitMavenPublishing {
@@ -45,6 +45,13 @@ java {
 
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(8)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+    }
 }
 
 afterEvaluate {

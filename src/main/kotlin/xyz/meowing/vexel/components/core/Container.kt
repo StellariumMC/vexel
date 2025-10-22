@@ -207,12 +207,11 @@ open class Container(
                     val centerX = getScreenX() + width / 2
                     val centerY = getScreenY() + height / 2
                     when (current) {
-                        is Container if current.scrollable -> {
-                            if (!current.isMouseOnVisible(centerX, centerY)) return false
+                        is Container -> {
+                            if (current.scrollable && !current.isMouseOnVisible(centerX, centerY)) return false
                         }
-
-                        is Rectangle if current.scrollable -> {
-                            if (!current.isMouseOnVisible(centerX, centerY)) return false
+                        is Rectangle -> {
+                            if (current.scrollable && !current.isMouseOnVisible(centerX, centerY)) return false
                         }
                     }
                     current = current.parent
