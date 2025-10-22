@@ -42,7 +42,7 @@ dependencies {
         modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
     }
 
-    modApi(include("xyz.meowing:knit-$mcData:110")!!)
+    modApi(include("xyz.meowing:knit-$mcData:111")!!)
 
     val lwjglVersion = if (mcData.version <= MinecraftVersions.VERSION_1_20_1) "3.3.1" else "3.3.3"
     api(shade("org.lwjgl:lwjgl-nanovg:$lwjglVersion")!!)
@@ -59,6 +59,13 @@ toolkitMavenPublishing {
 java {
     withSourcesJar()
     withJavadocJar()
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+    }
 }
 
 afterEvaluate {
