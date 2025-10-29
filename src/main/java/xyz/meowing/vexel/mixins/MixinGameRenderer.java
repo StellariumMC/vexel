@@ -26,6 +26,6 @@ public class MixinGameRenderer {
     //#elseif MC == 1.20.1
     //$$ public void hookRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
     //#endif
-        if (getEventBus().post(new GuiEvent.Render())) ci.cancel();
+        if (getEventBus().post(new GuiEvent.Render(), false)) ci.cancel();
     }
 }
