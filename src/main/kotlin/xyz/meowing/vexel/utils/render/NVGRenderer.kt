@@ -30,6 +30,10 @@ import com.mojang.blaze3d.opengl.GlStateManager
 //$$ import com.mojang.blaze3d.platform.GlStateManager
 //#endif
 
+//#if MC >= 1.21.9
+//$$ import org.lwjgl.opengl.GL13
+//#endif
+
 /**
  * Implementation adapted from Odin by odtheking
  * Original work: https://github.com/odtheking/Odin
@@ -73,7 +77,11 @@ object NVGRenderer {
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
+        //#if MC >= 1.21.9
+        //$$ TextureTracker.previousActiveTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
+        //#else
         TextureTracker.previousActiveTexture = GlStateManager._getActiveTexture()
+        //#endif
 
         val framebuffer = client.framebuffer ?: return
 
