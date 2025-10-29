@@ -18,9 +18,4 @@ public class MixinGlStateManager {
     private static void onBindTexture(int texture, CallbackInfo ci) {
         TextureTracker.setPreviousBoundTexture(texture);
     }
-
-    @Inject(method = "_activeTexture", at = @At("HEAD"), remap = false)
-    private static void onActiveTexture(int texture, CallbackInfo ci) {
-        TextureTracker.setPreviousActiveTexture(texture);
-    }
 }

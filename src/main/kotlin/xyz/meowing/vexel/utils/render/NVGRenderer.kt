@@ -21,7 +21,6 @@ import java.awt.Color
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.round
 
 //#if MC > 1.20.1
 import net.minecraft.client.gl.GlBackend
@@ -73,6 +72,8 @@ object NVGRenderer {
 
     fun beginFrame(width: Float, height: Float) {
         if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
+
+        TextureTracker.previousActiveTexture = GlStateManager._getActiveTexture()
 
         val framebuffer = client.framebuffer ?: return
 
