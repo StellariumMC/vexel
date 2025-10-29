@@ -23,7 +23,10 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
 
     init {
         events.add(eventBus.register<GuiEvent.Render> {
-            if (KnitClient.client.currentScreen == this) window.draw()
+            if (KnitClient.client.currentScreen == this) {
+                window.draw()
+                onRenderGui()
+            }
         })
     }
 
@@ -70,6 +73,11 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
     override fun onKeyType(typedChar: Char, keyCode: Int, scanCode: Int) {
         window.charType(keyCode, scanCode,typedChar)
     }
+
+    /**
+     * Called after the elements and animations render
+     */
+    open fun onRenderGui() {}
 
     fun display() {
         Timer().schedule(50) {
