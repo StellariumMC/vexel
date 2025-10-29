@@ -230,17 +230,23 @@ open class Container(
     public override fun getAutoWidth(): Float {
         val visibleChildren = children.filter { it.visible && !it.isFloating }
         if (visibleChildren.isEmpty()) return padding[1] + padding[3]
+
         val minX = visibleChildren.minOf { it.x }
         val maxX = visibleChildren.maxOf { it.x + it.width }
-        return (maxX - minX) + padding[3] + padding[1]
+
+        val calculated = (maxX - minX) + padding[3] + padding[1]
+        return maxAutoWidth?.let { calculated.coerceAtMost(it) } ?: calculated
     }
 
     public override fun getAutoHeight(): Float {
         val visibleChildren = children.filter { it.visible && !it.isFloating }
         if (visibleChildren.isEmpty()) return padding[0] + padding[2]
+
         val minY = visibleChildren.minOf { it.y }
         val maxY = visibleChildren.maxOf { it.y + it.height }
-        return (maxY - minY) + padding[0] + padding[2]
+
+        val calculated = (maxY - minY) + padding[0] + padding[2]
+        return maxAutoHeight?.let { calculated.coerceAtMost(it) } ?: calculated
     }
 
     override fun renderChildren(mouseX: Float, mouseY: Float) {

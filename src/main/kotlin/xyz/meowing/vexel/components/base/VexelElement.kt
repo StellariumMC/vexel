@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED", "UNCHECKED_CAST")
+
 package xyz.meowing.vexel.components.base
 
 import xyz.meowing.knit.api.input.KnitMouse
@@ -91,6 +93,9 @@ abstract class VexelElement<T : VexelElement<T>>(
 
     var xConstraint: Float = 0f
     var yConstraint: Float = 0f
+
+    var maxAutoWidth: Float? = null
+    var maxAutoHeight: Float? = null
 
     var xOffset: Float = 0f
     var yOffset: Float = 0f
@@ -321,14 +326,16 @@ abstract class VexelElement<T : VexelElement<T>>(
         val maxWidth = children
             .filter { it.visible && !it.isFloating }
             .maxOfOrNull { (x - it.x) + it.width }
-        return maxWidth?.coerceAtLeast(0f) ?: 0f
+        val calculated = maxWidth?.coerceAtLeast(0f) ?: 0f
+        return maxAutoWidth?.let { calculated.coerceAtMost(it) } ?: calculated
     }
 
     protected open fun getAutoHeight(): Float {
         val maxHeight = children
             .filter { it.visible && !it.isFloating }
             .maxOfOrNull { (y - it.y) + it.height }
-        return maxHeight?.coerceAtLeast(0f) ?: 0f
+        val calculated = maxHeight?.coerceAtLeast(0f) ?: 0f
+        return maxAutoHeight?.let { calculated.coerceAtMost(it) } ?: calculated
     }
 
     private fun computeOffset(offset: Float, offsetType: Offset, isWidth: Boolean): Float {
@@ -664,26 +671,29 @@ abstract class VexelElement<T : VexelElement<T>>(
 
     protected abstract fun onRender(mouseX: Float, mouseY: Float)
 
-    @Suppress("UNCHECKED_CAST")
     fun childOf(parent: VexelElement<*>): T {
         parent.addChild(this)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun childOf(parent: VexelWindow): T {
         parent.addChild(this)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun addChild(child: VexelElement<*>): T {
         child.parent = this
         children.add(child)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
+    fun setMaxAutoSize(maxWidth: Float? = null, maxHeight: Float? = null): T {
+        this.maxAutoWidth = maxWidth
+        this.maxAutoHeight = maxHeight
+        cache.sizeCacheValid = false
+        return this as T
+    }
+
     fun setSizing(widthType: Size, heightType: Size): T {
         this.widthType = widthType
         this.heightType = heightType
@@ -691,7 +701,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setSizing(width: Float, widthType: Size, height: Float, heightType: Size): T {
         this.widthType = widthType
         this.heightType = heightType
@@ -703,7 +712,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setPositioning(xConstraint: Pos, yConstraint: Pos): T {
         this.xPositionConstraint = xConstraint
         this.yPositionConstraint = yConstraint
@@ -711,7 +719,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setPositioning(xVal: Float, xPos: Pos, yVal: Float, yPos: Pos): T {
         this.xConstraint = xVal
         this.xPositionConstraint = xPos
@@ -721,7 +728,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setPositioning(xVal: Any, xPos: Pos, yVal: Any, yPos: Pos): T {
         this.xConstraint = when (xVal) {
             is DimensionValue -> xVal.resolve(this, true)
@@ -742,7 +748,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setSizing(width: Any, widthType: Size, height: Any, heightType: Size): T {
         this.widthType = widthType
         this.heightType = heightType
@@ -768,7 +773,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setAlignment(xAlignment: Alignment, yAlignment: Alignment): T {
         this.xAlignment = xAlignment
         this.yAlignment = yAlignment
@@ -776,35 +780,30 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun alignLeft(): T {
         this.xAlignment = Alignment.Start
         cache.positionCacheValid = false
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun alignRight(): T {
         this.xAlignment = Alignment.End
         cache.positionCacheValid = false
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun alignTop(): T {
         this.yAlignment = Alignment.Start
         cache.positionCacheValid = false
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun alignBottom(): T {
         this.yAlignment = Alignment.End
         cache.positionCacheValid = false
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setOffset(xOffset: Float, xOffsetType: Offset, yOffset: Float, yOffsetType: Offset): T {
         this.xOffset = xOffset
         this.xOffsetType = xOffsetType
@@ -814,7 +813,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setOffset(xOffset: Float, yOffset: Float): T {
         this.xOffset = xOffset
         this.xOffsetType = Offset.Pixels
@@ -824,7 +822,6 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun addTooltip(tooltip: String): T {
         tooltipElement = Tooltip().apply {
             innerText.text = tooltip
@@ -833,77 +830,64 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onMouseEnter(callback: (Float, Float) -> Unit): T {
         mouseEnterListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onMouseExit(callback: (Float, Float) -> Unit): T {
         mouseExitListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onMouseMove(callback: (Float, Float) -> Unit): T {
         mouseMoveListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onHover(onEnter: (Float, Float) -> Unit, onExit: (Float, Float) -> Unit = { _, _ -> }): T {
         onMouseEnter(onEnter)
         onMouseExit(onExit)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onMouseClick(callback: (Float, Float, Int) -> Boolean): T {
         mouseClickListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onClick(callback: (Float, Float, Int) -> Boolean): T {
         return onMouseClick(callback)
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onMouseRelease(callback: (Float, Float, Int) -> Boolean): T {
         mouseReleaseListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onRelease(callback: (Float, Float, Int) -> Boolean): T {
         return onMouseRelease(callback)
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onMouseScroll(callback: (Float, Float, Double, Double) -> Boolean): T {
         mouseScrollListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onScroll(callback: (Float, Float, Double, Double) -> Boolean): T {
         return onMouseScroll(callback)
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onCharType(callback: (Int, Int, Char) -> Boolean): T {
         charTypeListeners.add(callback)
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun onValueChange(callback: (Any) -> Unit): T {
         this.onValueChange = callback
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun ignoreMouseEvents(): T {
         mouseClickListeners.add { _, _, _ -> false }
         mouseReleaseListeners.add { _, _, _ -> false }
@@ -914,37 +898,31 @@ abstract class VexelElement<T : VexelElement<T>>(
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun ignoreFocus(): T {
         ignoreFocus = true
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setFloating(): T {
         isFloating = true
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun setRequiresFocus(): T {
         requiresFocus = true
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun show(): T {
         visible = true
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun hide(): T {
         visible = false
         return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun enableDebugRendering(): T {
         renderHitbox = true
         return this as T
