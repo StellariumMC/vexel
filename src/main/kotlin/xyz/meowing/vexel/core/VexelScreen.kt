@@ -1,6 +1,7 @@
 package xyz.meowing.vexel.core
 
 import xyz.meowing.knit.api.KnitClient
+import xyz.meowing.knit.api.events.EventCall
 import xyz.meowing.knit.api.screen.KnitScreen
 import xyz.meowing.vexel.Vexel.eventBus
 import xyz.meowing.vexel.events.GuiEvent
@@ -9,6 +10,8 @@ import java.util.Timer
 import kotlin.concurrent.schedule
 
 abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(screenName) {
+    val events = mutableListOf<EventCall>()
+
     var initialized = false
         private set
     var hasInitialized = false
@@ -19,9 +22,9 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
     open fun afterInitialization() {}
 
     init {
-        eventBus.register<GuiEvent.Render> {
+        events.add(eventBus.register<GuiEvent.Render> {
             if (KnitClient.client.currentScreen == this) window.draw()
-        }
+        })
     }
 
     final override fun onInitGui() {
@@ -39,6 +42,8 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
 
     override fun onCloseGui() {
         window.cleanup()
+        events.toList().forEach { it.unregister() }
+        events.clear()
         hasInitialized = false
     }
 
