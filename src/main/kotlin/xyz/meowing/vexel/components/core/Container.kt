@@ -19,6 +19,8 @@ open class Container(
     var scrollbarPadding: Float = 0f
     var scrollbarIgnorePadding: Boolean = false
     var scrollbarCustomPadding: Float = 0f
+    var scissorBufferVertical: Float = 0f
+    var scissorBufferHorizontal: Float = 2f
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
 
@@ -250,10 +252,10 @@ open class Container(
 
             NVGRenderer.push()
             NVGRenderer.pushScissor(
-                contentX,
-                contentY,
-                viewWidth,
-                viewHeight
+                contentX - scissorBufferHorizontal,
+                contentY - scissorBufferVertical,
+                viewWidth + scissorBufferHorizontal * 2,
+                viewHeight + scissorBufferVertical * 2
             )
             NVGRenderer.translate(0f, -scrollOffset)
         }
@@ -285,6 +287,11 @@ open class Container(
     }
 
     open fun scrollable(enabled: Boolean): Container = apply { scrollable = enabled }
+
+    open fun setScissorBuffer(vertical: Float, horizontal: Float): Container = apply {
+        scissorBufferVertical = vertical
+        scissorBufferHorizontal = horizontal
+    }
 
     open fun showScrollbar(show: Boolean): Container = apply {
         showScrollbar = show

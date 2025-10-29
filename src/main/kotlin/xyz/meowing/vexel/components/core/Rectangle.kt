@@ -36,6 +36,8 @@ open class Rectangle(
     var scrollbarIgnorePadding: Boolean = false
     var scrollbarCustomPadding: Float = 0f
     var rotation: Float = 0f
+    var scissorBufferVertical: Float = 0f
+    var scissorBufferHorizontal: Float = 2f
 
     var shadowBlur = 30f
     var shadowSpread = 1f
@@ -333,10 +335,10 @@ open class Rectangle(
 
             NVGRenderer.push()
             NVGRenderer.pushScissor(
-                contentX,
-                contentY,
-                viewWidth,
-                viewHeight
+                contentX - scissorBufferHorizontal,
+                contentY - scissorBufferVertical,
+                viewWidth + scissorBufferHorizontal * 2,
+                viewHeight + scissorBufferVertical * 2
             )
             NVGRenderer.translate(0f, -scrollOffset)
         }
@@ -381,6 +383,11 @@ open class Rectangle(
 
     open fun scrollable(enabled: Boolean): Rectangle = apply {
         scrollable = enabled
+    }
+
+    open fun setScissorBuffer(vertical: Float, horizontal: Float) = apply {
+        scissorBufferVertical = vertical
+        scissorBufferHorizontal = horizontal
     }
 
     open fun padding(top: Float = 0f, right: Float = 0f, bottom: Float = 0f, left: Float = 0f): Rectangle = apply {
