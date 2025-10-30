@@ -81,7 +81,7 @@ class Switch(
             thumb.backgroundColor = thumbTargetColor
         }
         
-        if (!silent) onValueChange?.invoke(enabled)
+        if (!silent) onValueChange.forEach { it.invoke(enabled) }
 
         return this
     }

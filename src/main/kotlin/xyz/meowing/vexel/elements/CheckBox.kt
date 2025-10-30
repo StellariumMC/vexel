@@ -67,7 +67,7 @@ class CheckBox(
         } else if (animated) {
             checkMark.fadeIn(100, EasingType.EASE_IN)
         }
-        if (!silent) onValueChange?.invoke(checked)
+        if (!silent) onValueChange.forEach { it.invoke(checked) }
     }
 
     private fun updateBackgroundColor() {

@@ -97,7 +97,7 @@ class Dropdown(
             selectedIndex = index as Int
             selectedText.text = options[selectedIndex]
             closePicker()
-            onValueChange?.invoke(index)
+            onValueChange.forEach { it.invoke(index) }
         }
 
         pickerPanel?.backgroundPopup?.fadeIn(200, EasingType.EASE_OUT) {
@@ -210,7 +210,7 @@ class DropDownPanel(
                 .setSizing(100f, Size.ParentPerc, 0f, Size.Auto)
                 .setPositioning(0f, Pos.ParentPixels, 1f, Pos.AfterSibling)
                 .onClick { _, _, _ ->
-                    onValueChange?.invoke(index)
+                    onValueChange.forEach { it.invoke(index) }
                     true
                 }
                 .childOf(backgroundPopup)

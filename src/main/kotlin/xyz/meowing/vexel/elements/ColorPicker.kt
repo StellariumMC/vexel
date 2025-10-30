@@ -78,7 +78,7 @@ class ColorPicker(
         pickerPanel?.onValueChange { color ->
             selectedColor = color as Color
             previewRect.backgroundColor = color.rgb
-            onValueChange?.invoke(color)
+            onValueChange.forEach { it.invoke(color) }
         }
 
         pickerPanel?.background?.fadeIn(200, EasingType.EASE_OUT) {
@@ -164,7 +164,7 @@ class ColorPicker(
     fun setColor(color: Color, silent: Boolean = false): ColorPicker {
         selectedColor = color
         previewRect.backgroundColor = color.rgb
-        if (!silent) onValueChange?.invoke(color)
+        if (!silent) onValueChange.forEach { it.invoke(color) }
         return this
     }
 }
@@ -292,7 +292,7 @@ class ColorPickerPanel(
         pickerArea.currentHue = currentHue
         alphaSlider.currentColor = Color(baseColor.red, baseColor.green, baseColor.blue)
 
-        onValueChange?.invoke(currentColor)
+        onValueChange.forEach { it.invoke(currentColor) }
     }
 
     override fun onRender(mouseX: Float, mouseY: Float) {

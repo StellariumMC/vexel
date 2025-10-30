@@ -36,7 +36,7 @@ class TextInput(
             field = newVal
             cursorIndex = cursorIndex.coerceIn(0, field.length)
             selectionAnchor = selectionAnchor.coerceIn(0, field.length)
-            onValueChange?.invoke(field)
+            onValueChange.forEach { it.invoke(field) }
         }
 
     var isDragging = false

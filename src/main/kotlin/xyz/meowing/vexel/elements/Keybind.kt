@@ -64,7 +64,7 @@ class Keybind(
                 selectedScanId = scanCode
             }
 
-            onValueChange?.invoke(keyCode)
+            onValueChange.forEach { it.invoke(keyCode) }
             listen = false
             true
         }

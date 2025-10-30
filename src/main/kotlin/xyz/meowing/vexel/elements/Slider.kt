@@ -178,7 +178,7 @@ class Slider(
         updateThumbPosition(animated)
         updateTrackFill(animated)
 
-        if (!silent) onValueChange?.invoke(value)
+        if (!silent) onValueChange.forEach { it.invoke(value) }
         return this
     }
 
