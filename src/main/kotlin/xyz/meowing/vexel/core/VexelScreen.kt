@@ -10,7 +10,7 @@ import java.util.Timer
 import kotlin.concurrent.schedule
 
 abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(screenName) {
-    val events = mutableListOf<EventCall>()
+    var renderEvent: EventCall? = null
 
     var initialized = false
         private set
@@ -21,15 +21,6 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
 
     open fun afterInitialization() {}
 
-    init {
-        events.add(eventBus.register<GuiEvent.Render> {
-            if (KnitClient.client.currentScreen == this) {
-                window.draw()
-                onRenderGui()
-            }
-        })
-    }
-
     final override fun onInitGui() {
         if (!hasInitialized) {
             hasInitialized = true
@@ -38,6 +29,14 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
             NVGRenderer.cleanCache()
 
             afterInitialization()
+
+            renderEvent = eventBus.register<GuiEvent.Render> {
+                if (KnitClient.client.currentScreen == this) {
+                    window.draw()
+                    onRenderGui()
+                }
+            }
+
         } else {
             initialized = true
         }
@@ -45,8 +44,8 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
 
     override fun onCloseGui() {
         window.cleanup()
-        events.toList().forEach { it.unregister() }
-        events.clear()
+        renderEvent?.unregister()
+        renderEvent = null
         hasInitialized = false
     }
 
