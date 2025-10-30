@@ -1,6 +1,6 @@
 package xyz.meowing.vexel.components.base
 
-internal class ElementCache {
+class ElementCache {
     var cachedParent: VexelElement<*>? = null
     var parentCacheValid = false
     var positionCacheValid = false

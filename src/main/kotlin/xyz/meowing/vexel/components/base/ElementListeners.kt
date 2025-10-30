@@ -1,6 +1,6 @@
 package xyz.meowing.vexel.components.base
 
-internal class ElementListeners {
+class ElementListeners {
     val mouseEnter = mutableListOf<(Float, Float) -> Unit>()
     val mouseExit = mutableListOf<(Float, Float) -> Unit>()
     val mouseMove = mutableListOf<(Float, Float) -> Unit>()

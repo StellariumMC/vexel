@@ -119,10 +119,10 @@ abstract class VexelElement<T : VexelElement<T>>(
         }
 
     var tooltipElement: Tooltip? = null
-    var onValueChange: ((Any) -> Unit)? = null
+    var onValueChange = mutableListOf<(Any) -> Unit>()
 
-    internal val cache = ElementCache()
-    internal val listeners = ElementListeners()
+    val cache = ElementCache()
+    val listeners = ElementListeners()
 
     val mouseEnterListeners get() = listeners.mouseEnter
     val mouseExitListeners get() = listeners.mouseExit
@@ -132,19 +132,19 @@ abstract class VexelElement<T : VexelElement<T>>(
     val mouseReleaseListeners get() = listeners.mouseRelease
     val charTypeListeners get() = listeners.charType
 
-    private fun invalidateChildrenCache() {
+    fun invalidateChildrenCache() {
         for (child in children) {
             child.cache.invalidate()
         }
     }
 
-    private fun invalidateChildrenPositions() {
+    fun invalidateChildrenPositions() {
         for (child in children) {
             child.cache.invalidatePosition()
         }
     }
 
-    private fun invalidateChildrenSizes() {
+    fun invalidateChildrenSizes() {
         for (child in children) {
             child.cache.invalidateSize()
         }
@@ -182,7 +182,7 @@ abstract class VexelElement<T : VexelElement<T>>(
         listeners.clear()
         tooltipElement?.destroy()
         tooltipElement = null
-        onValueChange = null
+        onValueChange.clear()
 
         (parent as? VexelElement<*>)?.children?.remove(this)
         parent = null
@@ -884,7 +884,7 @@ abstract class VexelElement<T : VexelElement<T>>(
     }
 
     fun onValueChange(callback: (Any) -> Unit): T {
-        this.onValueChange = callback
+        this.onValueChange.add(callback)
         return this as T
     }
 
