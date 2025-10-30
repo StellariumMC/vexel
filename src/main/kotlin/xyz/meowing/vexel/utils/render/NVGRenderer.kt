@@ -77,7 +77,7 @@ object NVGRenderer {
         if (StateTracker.drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
         //#if MC >= 1.21.9
-        //$$ TextureTracker.previousActiveTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
+        //$$ StateTracker.previousActiveTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
         //#else
         StateTracker.previousActiveTexture = GlStateManager._getActiveTexture()
         //#endif
