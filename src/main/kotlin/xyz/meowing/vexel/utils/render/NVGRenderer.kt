@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.util.Identifier
 import org.lwjgl.nanovg.*
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
@@ -44,7 +45,7 @@ import com.mojang.blaze3d.opengl.GlStateManager
 object NVGRenderer {
     private val nvgPaint = NVGPaint.malloc()
     private val nvgColor = NVGColor.malloc()
-    private val nvgColor2: NVGColor = NVGColor.malloc()
+    private val nvgColor2 = NVGColor.malloc()
 
     val defaultFont =
         Font("Default", client.resourceManager.getResource(
@@ -67,23 +68,34 @@ object NVGRenderer {
 
     private var vg = -1L
 
-    private var drawing: Boolean = false
-
     init {
         vg = NanoVGGL3.nvgCreate(NanoVGGL3.NVG_ANTIALIAS or NanoVGGL3.NVG_STENCIL_STROKES)
         require(vg != -1L) { "Failed to initialize NanoVG" }
     }
 
     fun beginFrame(width: Float, height: Float) {
-        if (drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
+        if (StateTracker.drawing) throw IllegalStateException("[NVGRenderer] Already drawing, but called beginFrame")
 
         //#if MC >= 1.21.9
         //$$ TextureTracker.previousActiveTexture = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE)
         //#else
-        TextureTracker.previousActiveTexture = GlStateManager._getActiveTexture()
+        StateTracker.previousActiveTexture = GlStateManager._getActiveTexture()
         //#endif
 
+        StateTracker.previousProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM)
+
         val framebuffer = client.framebuffer ?: return
+
+        if (
+            vg == -1L ||
+            //#if MC <= 1.20.1 && FORGE-LIKE
+            //$$ framebuffer.colorTextureId == -1
+            //#elseif MC <= 1.20.1 && FABRIC
+            //$$ framebuffer.colorAttachment == null
+            //#else
+            framebuffer.colorAttachment == null
+            //#endif
+        ) return
 
         val glFramebuffer =
             //#if MC <= 1.20.1
@@ -113,11 +125,11 @@ object NVGRenderer {
 
         NanoVG.nvgBeginFrame(vg, width, height, 1f)
         NanoVG.nvgTextAlign(vg, NanoVG.NVG_ALIGN_LEFT or NanoVG.NVG_ALIGN_TOP)
-        drawing = true
+        StateTracker.drawing = true
     }
 
     fun endFrame() {
-        if (!drawing) throw IllegalStateException("[NVGRenderer] Not drawing, but called endFrame")
+        if (!StateTracker.drawing) throw IllegalStateException("[NVGRenderer] Not drawing, but called endFrame")
         NanoVG.nvgEndFrame(vg)
 
         GlStateManager._disableCull() // default states that mc expects
@@ -125,11 +137,11 @@ object NVGRenderer {
         GlStateManager._enableBlend()
         GlStateManager._blendFuncSeparate(770, 771, 1, 0)
 
-        GlStateManager._glUseProgram(0) // fixes invalid program errors when using NVG
+        if (StateTracker.previousProgram != -1) GlStateManager._glUseProgram(StateTracker.previousProgram) // fixes invalid program errors when using NVG
 
-        if (TextureTracker.previousActiveTexture != -1) { // prevents issues with gui background rendering
-            GlStateManager._activeTexture(TextureTracker.previousActiveTexture)
-            if (TextureTracker.previousBoundTexture != -1) GlStateManager._bindTexture(TextureTracker.previousBoundTexture)
+        if (StateTracker.previousActiveTexture != -1) { // prevents issues with gui background rendering
+            GlStateManager._activeTexture(StateTracker.previousActiveTexture)
+            if (StateTracker.previousBoundTexture != -1) GlStateManager._bindTexture(StateTracker.previousBoundTexture)
         }
 
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0) // fixes macos issues
@@ -141,7 +153,7 @@ object NVGRenderer {
         //$$ client.framebuffer?.beginWrite(true)
         //#endif
         //#endif
-        drawing = false
+        StateTracker.drawing = false
     }
 
     fun push() = NanoVG.nvgSave(vg)
