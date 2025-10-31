@@ -28,3 +28,11 @@ enum class Alignment {
     Start,
     End
 }
+
+
+enum class TooltipPosition {
+    Top,
+    Bottom,
+    Left,
+    Right
+}
