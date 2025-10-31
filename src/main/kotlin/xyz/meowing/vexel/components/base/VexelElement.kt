@@ -20,32 +20,32 @@ abstract class VexelElement<T : VexelElement<T>>(
 ) {
     val children: MutableList<VexelElement<*>> = mutableListOf()
 
-    var renderHitbox = false
-    var xPositionConstraint = Pos.ParentPixels
-    var yPositionConstraint = Pos.ParentPixels
-    var xAlignment = Alignment.None
-    var yAlignment = Alignment.None
+    open var renderHitbox = false
+    open var xPositionConstraint = Pos.ParentPixels
+    open var yPositionConstraint = Pos.ParentPixels
+    open var xAlignment = Alignment.None
+    open var yAlignment = Alignment.None
 
-    var x: Float = 0f
+    open var x: Float = 0f
         set(value) {
             field = value
             invalidateChildrenPositions()
         }
 
-    var y: Float = 0f
+    open var y: Float = 0f
         set(value) {
             field = value
             invalidateChildrenPositions()
         }
 
-    var width: Float = 0f
+    open var width: Float = 0f
         set(value) {
             field = value
             invalidateChildrenPositions()
             invalidateChildrenSizes()
         }
 
-    var height: Float = 0f
+    open var height: Float = 0f
         set(value) {
             field = value
             invalidateChildrenPositions()
@@ -82,7 +82,7 @@ abstract class VexelElement<T : VexelElement<T>>(
     var widthPercent: Float = 100f
     var heightPercent: Float = 100f
 
-    var visible: Boolean = true
+    open var visible: Boolean = true
         set(value) {
             if (field != value) {
                 field = value
@@ -91,23 +91,23 @@ abstract class VexelElement<T : VexelElement<T>>(
             }
         }
 
-    var xConstraint: Float = 0f
-    var yConstraint: Float = 0f
+    open var xConstraint: Float = 0f
+    open var yConstraint: Float = 0f
 
-    var maxAutoWidth: Float? = null
-    var maxAutoHeight: Float? = null
+    open var maxAutoWidth: Float? = null
+    open var maxAutoHeight: Float? = null
 
-    var xOffset: Float = 0f
-    var yOffset: Float = 0f
-    var xOffsetType: Offset = Offset.Pixels
-    var yOffsetType: Offset = Offset.Pixels
+    open var xOffset: Float = 0f
+    open var yOffset: Float = 0f
+    open var xOffsetType: Offset = Offset.Pixels
+    open var yOffsetType: Offset = Offset.Pixels
 
-    var isHovered: Boolean = false
-    var isPressed: Boolean = false
-    var isFocused: Boolean = false
-    var isFloating: Boolean = false
-    var ignoreFocus: Boolean = false
-    var requiresFocus: Boolean = false
+    open var isHovered: Boolean = false
+    open var isPressed: Boolean = false
+    open var isFocused: Boolean = false
+    open var isFloating: Boolean = false
+    open var ignoreFocus: Boolean = false
+    open var requiresFocus: Boolean = false
 
     val screenWidth: Int get() = KnitResolution.windowWidth
     val screenHeight: Int get() = KnitResolution.windowHeight
@@ -132,19 +132,19 @@ abstract class VexelElement<T : VexelElement<T>>(
     val mouseReleaseListeners get() = listeners.mouseRelease
     val charTypeListeners get() = listeners.charType
 
-    fun invalidateChildrenCache() {
+    open fun invalidateChildrenCache() {
         for (child in children) {
             child.cache.invalidate()
         }
     }
 
-    fun invalidateChildrenPositions() {
+    open fun invalidateChildrenPositions() {
         for (child in children) {
             child.cache.invalidatePosition()
         }
     }
 
-    fun invalidateChildrenSizes() {
+    open fun invalidateChildrenSizes() {
         for (child in children) {
             child.cache.invalidateSize()
         }
@@ -499,7 +499,7 @@ abstract class VexelElement<T : VexelElement<T>>(
         }
     }
 
-    fun isPointInside(mouseX: Float, mouseY: Float): Boolean {
+    open fun isPointInside(mouseX: Float, mouseY: Float): Boolean {
         return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height
     }
 
