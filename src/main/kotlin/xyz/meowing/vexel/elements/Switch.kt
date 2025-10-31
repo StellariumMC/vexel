@@ -29,6 +29,8 @@ class Switch(
     heightType: Size = Size.Pixels
 ) : VexelElement<Switch>(widthType, heightType) {
     var enabled: Boolean = false
+    var enabledPadding: Float = -2f
+    var disabledPadding: Float = 0f
     
     val track = Rectangle(
         backgroundColor,
@@ -67,7 +69,7 @@ class Switch(
     fun setEnabled(value: Boolean, animated: Boolean = true, silent: Boolean = false): Switch {
         enabled = value
         
-        val thumbTargetX = if (enabled) width - thumb.width - 6f else 2f
+        val thumbTargetX = if (enabled) width - thumb.width + enabledPadding else 2f + disabledPadding
         val trackTargetColor = if (enabled) trackEnabledColor else trackDisabledColor
         val thumbTargetColor = if (enabled) thumbColor else thumbDisabledColor
         
