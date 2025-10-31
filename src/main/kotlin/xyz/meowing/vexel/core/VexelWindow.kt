@@ -40,8 +40,8 @@ class VexelWindow {
         children.reversed().forEach { it.handleMouseScroll(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), horizontalDelta, verticalDelta) }
     }
 
-    fun charType(keyCode: Int, scanCode: Int , charTyped: Char) {
-        children.reversed().forEach { it.handleCharType(keyCode, scanCode, charTyped) }
+    fun charType(keyCode: Int, scanCode: Int, charTyped: Char): Boolean {
+        return children.reversed().any { it.handleCharType(keyCode, scanCode, charTyped) }
     }
 
     fun onWindowResize() {

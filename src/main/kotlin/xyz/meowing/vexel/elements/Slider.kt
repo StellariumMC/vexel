@@ -40,7 +40,6 @@ class Slider(
     var isDragging = false
     private var dragStartX = 0f
     private var dragStartValue = 0f
-    private var globalMoveListener: ((Float, Float) -> Unit)? = null
     private var globalReleaseListener: ((Float, Float, Int) -> Boolean)? = null
     private val separators: MutableList<Rectangle> = mutableListOf()
 
@@ -112,10 +111,10 @@ class Slider(
                     null, null,
                     Size.Pixels, Size.Pixels
                 )
-                .setSizing(3f, Size.Pixels, trackHeight, Size.Pixels)
-                .setPositioning(stepPercent, Pos.ParentPercent, 0f, Pos.ParentCenter)
-                .ignoreMouseEvents()
-                .childOf(stepContainer)
+                    .setSizing(3f, Size.Pixels, trackHeight, Size.Pixels)
+                    .setPositioning(stepPercent, Pos.ParentPercent, 0f, Pos.ParentCenter)
+                    .ignoreMouseEvents()
+                    .childOf(stepContainer)
 
                 separators.add(separator)
             }
@@ -127,16 +126,6 @@ class Slider(
         dragStartX = mouseX
         dragStartValue = value
 
-        globalMoveListener = { mx, my ->
-            if (isDragging) {
-                val deltaX = mx - dragStartX
-                val trackWidth = container.width
-                val valueChange = (deltaX / trackWidth) * (maxValue - minValue)
-                val newValue = (dragStartValue + valueChange).coerceIn(minValue, maxValue)
-                setValue(newValue, animated = false)
-            }
-        }
-
         globalReleaseListener = { mx, my, btn ->
             if (btn == 0 && isDragging) {
                 stopDragging()
@@ -144,16 +133,24 @@ class Slider(
             } else false
         }
 
-        getRootElement().let { root ->
-            root.onMouseMove(globalMoveListener!!)
-            root.onMouseRelease(globalReleaseListener!!)
-        }
+        getRootElement().onMouseRelease(globalReleaseListener!!)
     }
 
     fun stopDragging() {
         isDragging = false
-        globalMoveListener = null
         globalReleaseListener = null
+    }
+
+    override fun handleMouseMove(mouseX: Float, mouseY: Float): Boolean {
+        if (isDragging) {
+            val deltaX = mouseX - dragStartX
+            val trackWidth = container.width
+            val valueChange = (deltaX / trackWidth) * (maxValue - minValue)
+            val newValue = (dragStartValue + valueChange).coerceIn(minValue, maxValue)
+            setValue(newValue, animated = false)
+            return true
+        }
+        return super.handleMouseMove(mouseX, mouseY)
     }
 
     override fun handleMouseRelease(mouseX: Float, mouseY: Float, button: Int): Boolean {

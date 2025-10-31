@@ -2,6 +2,7 @@ package xyz.meowing.vexel.core
 
 import xyz.meowing.knit.api.KnitClient
 import xyz.meowing.knit.api.events.EventCall
+import xyz.meowing.knit.api.input.KnitKeys
 import xyz.meowing.knit.api.screen.KnitScreen
 import xyz.meowing.vexel.Vexel.eventBus
 import xyz.meowing.vexel.events.GuiEvent
@@ -70,7 +71,8 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
     }
 
     override fun onKeyType(typedChar: Char, keyCode: Int, scanCode: Int) {
-        window.charType(keyCode, scanCode,typedChar)
+        val handled = window.charType(keyCode, scanCode, typedChar)
+        if (!handled && keyCode == KnitKeys.KEY_ESCAPE.code) close()
     }
 
     /**
