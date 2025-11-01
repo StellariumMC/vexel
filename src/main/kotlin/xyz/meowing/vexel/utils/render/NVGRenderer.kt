@@ -22,13 +22,12 @@ import java.awt.Color
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.round
 
 //#if MC > 1.20.1
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import com.mojang.blaze3d.opengl.GlStateManager
-import kotlin.math.round
-
 //#else
 //$$ import com.mojang.blaze3d.platform.GlStateManager
 //#endif
