@@ -27,6 +27,8 @@ import kotlin.math.min
 import net.minecraft.client.gl.GlBackend
 import net.minecraft.client.texture.GlTexture
 import com.mojang.blaze3d.opengl.GlStateManager
+import kotlin.math.round
+
 //#else
 //$$ import com.mojang.blaze3d.platform.GlStateManager
 //#endif
@@ -227,6 +229,14 @@ object NVGRenderer {
     fun rect(x: Float, y: Float, w: Float, h: Float, color: Int) {
         NanoVG.nvgBeginPath(vg)
         NanoVG.nvgRect(vg, x, y, w, h + .5f)
+        color(color)
+        NanoVG.nvgFillColor(vg, nvgColor)
+        NanoVG.nvgFill(vg)
+    }
+
+    fun rect(x: Float, y: Float, w: Float, h: Float, color: Int, topRight: Float, topLeft: Float, bottomRight: Float, bottomLeft: Float) {
+        NanoVG.nvgBeginPath(vg)
+        NanoVG.nvgRoundedRectVarying(vg, round(x), round(y), round(w), round(h), topRight, topLeft, bottomRight, bottomLeft)
         color(color)
         NanoVG.nvgFillColor(vg, nvgColor)
         NanoVG.nvgFill(vg)

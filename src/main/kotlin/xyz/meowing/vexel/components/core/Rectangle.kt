@@ -43,6 +43,11 @@ open class Rectangle(
     var shadowSpread = 1f
     var shadowColor = 0x80000000.toInt()
 
+    var borderRadiusTopLeft: Float? = null
+    var borderRadiusTopRight: Float? = null
+    var borderRadiusBottomLeft: Float? = null
+    var borderRadiusBottomRight: Float? = null
+
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
 
@@ -70,7 +75,15 @@ open class Rectangle(
         }
 
         if (currentBgColor != 0) {
-            if(currentBgColor == backgroundColor && secondBackgroundColor != -1) {
+            if (hasVaryingRadius()) {
+                NVGRenderer.rect(
+                    x, y, width, height, currentBgColor,
+                    borderRadiusTopRight ?: borderRadius,
+                    borderRadiusTopLeft ?: borderRadius,
+                    borderRadiusBottomRight ?: borderRadius,
+                    borderRadiusBottomLeft ?: borderRadius
+                )
+            } else if (currentBgColor == backgroundColor && secondBackgroundColor != -1) {
                 NVGRenderer.gradientRect(x, y, width, height, backgroundColor, secondBackgroundColor, gradientType, borderRadius)
             } else {
                 NVGRenderer.rect(x, y, width, height, currentBgColor, borderRadius)
@@ -88,6 +101,10 @@ open class Rectangle(
         if (rotation != 0f) {
             NVGRenderer.pop()
         }
+    }
+
+    private fun hasVaryingRadius(): Boolean {
+        return borderRadiusTopLeft != null || borderRadiusTopRight != null || borderRadiusBottomLeft != null || borderRadiusBottomRight != null
     }
 
     private fun drawScrollbar() {
@@ -427,6 +444,22 @@ open class Rectangle(
 
     open fun borderRadius(radius: Float): Rectangle = apply {
         borderRadius = radius
+        borderRadiusTopLeft = null
+        borderRadiusTopRight = null
+        borderRadiusBottomLeft = null
+        borderRadiusBottomRight = null
+    }
+
+    open fun borderRadiusVarying(
+        topLeft: Float = borderRadius,
+        topRight: Float = borderRadius,
+        bottomLeft: Float = borderRadius,
+        bottomRight: Float = borderRadius
+    ): Rectangle = apply {
+        borderRadiusTopLeft = topLeft
+        borderRadiusTopRight = topRight
+        borderRadiusBottomLeft = bottomLeft
+        borderRadiusBottomRight = bottomRight
     }
 
     open fun borderThickness(thickness: Float): Rectangle = apply {
