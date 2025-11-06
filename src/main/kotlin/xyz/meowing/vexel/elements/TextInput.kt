@@ -92,7 +92,7 @@ class TextInput(
                 isFocused = true
                 isDragging = true
 
-                val clickRelX = mouseX - (x - scrollOffset)
+                val clickRelX = mouseX - (background.x + background.padding[3]) + scrollOffset
                 val newCursorIndex = getCharIndexAtAbsX(clickRelX)
 
                 val currentTime = System.currentTimeMillis()
@@ -129,6 +129,30 @@ class TextInput(
         }
     }
 
+    override fun renderChildren(mouseX: Float, mouseY: Float) {
+        background.updateHeight()
+        background.updateWidth()
+        background.updateX()
+        background.updateY()
+        background.cache.sizeCacheValid = true
+        background.cache.positionCacheValid = true
+        background.onRender(mouseX, mouseY)
+
+        val contentX = background.x + background.padding[3]
+        val contentY = background.y + background.padding[0]
+        val contentWidth = background.width - background.padding[1] - background.padding[3]
+        val contentHeight = background.height - background.padding[0] - background.padding[2]
+
+        NVGRenderer.push()
+        NVGRenderer.pushScissor(contentX, contentY, contentWidth, contentHeight)
+        NVGRenderer.translate(-scrollOffset, 0f)
+
+        background.children.forEach { it.render(mouseX, mouseY) }
+
+        NVGRenderer.popScissor()
+        NVGRenderer.pop()
+    }
+
     override fun onRender(mouseX: Float, mouseY: Float) {
         background.isHovered = hovered
         background.isPressed = pressed
@@ -142,8 +166,8 @@ class TextInput(
         if(hasSelection && !shouldShowPlaceholder) {
             val selStartStr = value.substring(0, selectionStart)
             val selEndStr = value.substring(0, selectionEnd)
-            val x1 = scrollOffset + NVGRenderer.textWidth(selStartStr, fontSize, NVGRenderer.defaultFont)
-            val x2 = scrollOffset + NVGRenderer.textWidth(selEndStr, fontSize, NVGRenderer.defaultFont)
+            val x1 = NVGRenderer.textWidth(selStartStr, fontSize, NVGRenderer.defaultFont)
+            val x2 = NVGRenderer.textWidth(selEndStr, fontSize, NVGRenderer.defaultFont)
 
             selectionRectangle.setPositioning(x1, Pos.ParentPixels, 0f, Pos.ParentCenter)
             selectionRectangle.setSizing(x2-x1, Size.Pixels, fontSize, Size.Pixels)
@@ -154,8 +178,8 @@ class TextInput(
 
         caret.height = fontSize
         caret.width = 1f
-        val x = NVGRenderer.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, NVGRenderer.defaultFont) - scrollOffset
-        caret.setPositioning(x, Pos.ParentPixels, 0f, Pos.ParentCenter)
+        val caretX = NVGRenderer.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, NVGRenderer.defaultFont)
+        caret.setPositioning(caretX, Pos.ParentPixels, 0f, Pos.ParentCenter)
         caret.visible = focused && caretVisible && !shouldShowPlaceholder
 
         if (System.currentTimeMillis() - lastBlink > caretBlinkRate) {
@@ -318,7 +342,8 @@ class TextInput(
             cursorIndex = newCursor.coerceIn(0, this.value.length)
             selectionAnchor = cursorIndex
 
-            val maxScroll = max(0f, NVGRenderer.textWidth(this.value, fontSize, NVGRenderer.defaultFont).toInt() - (width * 2))
+            val contentWidth = background.width - background.padding[1] - background.padding[3]
+            val maxScroll = max(0f, NVGRenderer.textWidth(this.value, fontSize, NVGRenderer.defaultFont) - contentWidth)
             if (scrollOffset > maxScroll) {
                 scrollOffset = maxScroll
             }
@@ -422,19 +447,20 @@ class TextInput(
     }
 
     private fun ensureCaretVisible() {
-        val caretXAbsolute = NVGRenderer.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, NVGRenderer.defaultFont).toInt()
+        val contentWidth = background.width - background.padding[1] - background.padding[3]
+        val caretXAbsolute = NVGRenderer.textWidth(value.substring(0, cursorIndex.coerceIn(0, value.length)), fontSize, NVGRenderer.defaultFont)
         val visibleTextStart = scrollOffset
-        val visibleTextEnd = scrollOffset + (width * 2)
+        val visibleTextEnd = scrollOffset + contentWidth
 
         if (caretXAbsolute < visibleTextStart) {
-            scrollOffset = caretXAbsolute.toFloat()
-        } else if (caretXAbsolute > visibleTextEnd - 1) {
-            scrollOffset = caretXAbsolute - (width * 2) + 1
+            scrollOffset = caretXAbsolute
+        } else if (caretXAbsolute > visibleTextEnd - 2) {
+            scrollOffset = caretXAbsolute - contentWidth + 2
         }
 
-        val maxScrollPossible = max(0f, NVGRenderer.textWidth(value, fontSize, NVGRenderer.defaultFont).toInt() - (width * 2))
+        val maxScrollPossible = max(0f, NVGRenderer.textWidth(value, fontSize, NVGRenderer.defaultFont) - contentWidth)
         scrollOffset = scrollOffset.coerceIn(0f, maxScrollPossible)
-        if (NVGRenderer.textWidth(value, fontSize, NVGRenderer.defaultFont).toInt() <= width * 2) {
+        if (NVGRenderer.textWidth(value, fontSize, NVGRenderer.defaultFont) <= contentWidth) {
             scrollOffset = 0f
         }
     }

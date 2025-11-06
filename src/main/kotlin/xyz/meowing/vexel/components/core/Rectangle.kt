@@ -51,7 +51,7 @@ open class Rectangle(
     private var isDraggingScrollbar = false
     private var scrollbarDragOffset = 0f
 
-    override fun onRender(mouseX: Float, mouseY: Float) {
+    public override fun onRender(mouseX: Float, mouseY: Float) {
         if (!visible || (height - (padding[0] + padding[2])) == 0f || (width - (padding[1] + padding[3])) == 0f) return
 
         val currentBgColor = when {
