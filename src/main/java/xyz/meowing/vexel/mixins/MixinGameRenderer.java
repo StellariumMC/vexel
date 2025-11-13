@@ -15,6 +15,11 @@ import static xyz.meowing.vexel.Vexel.getEventBus;
 import net.minecraft.client.render.RenderTickCounter;
 //#endif
 
+//#if MC >= 1.21.5 && FABRIC
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.gui.DrawContext;
+//#endif
+
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
     //#if MC >= 1.21.6
@@ -24,13 +29,29 @@ public class MixinGameRenderer {
     //#endif
 
     //#if MC > 1.20.1
-    public void hookRender(RenderTickCounter tickCounter, boolean tick, CallbackInfo ci) {
+    public void hookRender(
+            RenderTickCounter tickCounter,
+            boolean tick,
+            CallbackInfo ci
+            //#if MC >= 1.21.5 && FABRIC
+            , @Local DrawContext context
+            //#endif
+    ) {
     //#elseif MC == 1.20.1
     //$$ public void hookRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
     //#endif
 
         NVGRenderer.INSTANCE.beginFrame(KnitResolution.getWindowWidth(), KnitResolution.getWindowHeight());
-        if (getEventBus().post(new GuiEvent.Render(), false)) ci.cancel();
+        if (
+                getEventBus().post(
+                        new GuiEvent.Render(
+                                //#if MC >= 1.21.5 && FABRIC
+                                context
+                                //#endif
+                        ),
+                        false
+                )
+        ) ci.cancel();
         NVGRenderer.INSTANCE.endFrame();
     }
 }
