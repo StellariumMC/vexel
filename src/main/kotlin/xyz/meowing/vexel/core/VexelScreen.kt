@@ -1,6 +1,5 @@
 package xyz.meowing.vexel.core
 
-import net.minecraft.client.gui.DrawContext
 import xyz.meowing.knit.api.KnitClient
 import xyz.meowing.knit.api.events.EventCall
 import xyz.meowing.knit.api.input.KnitKeys
@@ -35,11 +34,7 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
             renderEvent = eventBus.register<GuiEvent.Render> {
                 if (KnitClient.client.currentScreen == this) {
                     window.draw()
-                    //#if MC >= 1.21.5 && FABRIC
-                    onRenderGui(it.context)
-                    //#else
-                    //$$ onRenderGui()
-                    //#endif
+                    onRenderGui()
                 }
             }
 
@@ -83,20 +78,7 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
     /**
      * Called after the elements and animations render.
      */
-    //#if MC >= 1.21.5 && FABRIC
-    @Deprecated("Use the other method, will be removed next version.")
-    //#endif
     open fun onRenderGui() {}
-
-    //#if MC >= 1.21.5 && FABRIC
-    /**
-     * Called after the elements and animations render
-     */
-    open fun onRenderGui(context: DrawContext) {
-        @Suppress("DEPRECATION")
-        onRenderGui()
-    }
-    //#endif
 
     fun display() {
         Timer().schedule(50) {

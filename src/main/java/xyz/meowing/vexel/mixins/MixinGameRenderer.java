@@ -33,9 +33,6 @@ public class MixinGameRenderer {
             RenderTickCounter tickCounter,
             boolean tick,
             CallbackInfo ci
-            //#if MC >= 1.21.5 && FABRIC
-            , @Local DrawContext context
-            //#endif
     ) {
     //#elseif MC == 1.20.1
     //$$ public void hookRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
@@ -44,11 +41,7 @@ public class MixinGameRenderer {
         NVGRenderer.INSTANCE.beginFrame(KnitResolution.getWindowWidth(), KnitResolution.getWindowHeight());
         if (
                 getEventBus().post(
-                        new GuiEvent.Render(
-                                //#if MC >= 1.21.5 && FABRIC
-                                context
-                                //#endif
-                        ),
+                        new GuiEvent.Render(),
                         false
                 )
         ) ci.cancel();
