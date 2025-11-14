@@ -129,30 +129,6 @@ class TextInput(
         }
     }
 
-    override fun renderChildren(mouseX: Float, mouseY: Float) {
-        background.updateHeight()
-        background.updateWidth()
-        background.updateX()
-        background.updateY()
-        background.cache.sizeCacheValid = true
-        background.cache.positionCacheValid = true
-        background.onRender(mouseX, mouseY)
-
-        val contentX = background.x + background.padding[3]
-        val contentY = background.y + background.padding[0]
-        val contentWidth = background.width - background.padding[1] - background.padding[3]
-        val contentHeight = background.height - background.padding[0] - background.padding[2]
-
-        NVGRenderer.push()
-        NVGRenderer.pushScissor(contentX, contentY, contentWidth, contentHeight)
-        NVGRenderer.translate(-scrollOffset, 0f)
-
-        background.children.forEach { it.render(mouseX, mouseY) }
-
-        NVGRenderer.popScissor()
-        NVGRenderer.pop()
-    }
-
     override fun onRender(mouseX: Float, mouseY: Float) {
         background.isHovered = hovered
         background.isPressed = pressed
@@ -163,7 +139,7 @@ class TextInput(
         innerText.text = if (shouldShowPlaceholder) placeholder else value
         innerText.textColor = textColor
 
-        if(hasSelection && !shouldShowPlaceholder) {
+        if (hasSelection && !shouldShowPlaceholder) {
             val selStartStr = value.substring(0, selectionStart)
             val selEndStr = value.substring(0, selectionEnd)
             val x1 = NVGRenderer.textWidth(selStartStr, fontSize, NVGRenderer.defaultFont)
@@ -186,6 +162,10 @@ class TextInput(
             caretVisible = !caretVisible
             lastBlink = System.currentTimeMillis()
         }
+    }
+
+    override fun renderChildren(mouseX: Float, mouseY: Float) {
+        background.render(mouseX, mouseY)
     }
 
     fun keyTyped(keyCode: Int, scanCode: Int, char: Char): Boolean {
