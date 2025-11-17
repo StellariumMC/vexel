@@ -401,8 +401,10 @@ abstract class VexelElement<T : VexelElement<T>>(
             return if (visibleParent != null) visibleParent.x + padding[3] + xConstraint else xConstraint
         }
 
-        val prev = parentElement.children[index - 1]
-        return prev.x + prev.width + xConstraint
+        val prevVisible = parentElement.children.subList(0, index).lastOrNull { it.visible }
+
+        val prev = prevVisible?.x ?: 0f
+        return prev + prev.width + xConstraint
     }
 
     private fun computeMatchSiblingX(): Float {
@@ -460,8 +462,10 @@ abstract class VexelElement<T : VexelElement<T>>(
             return if (visibleParent != null) visibleParent.y + padding[0] + yConstraint else yConstraint
         }
 
-        val prev = parentElement.children[index - 1]
-        return prev.y + prev.height + yConstraint
+        val prevVisible = parentElement.children.subList(0, index).lastOrNull { it.visible }
+
+        val prev = prevVisible?.y ?: 0f
+        return prev + prev.height + yConstraint
     }
 
     private fun computeMatchSiblingY(): Float {
