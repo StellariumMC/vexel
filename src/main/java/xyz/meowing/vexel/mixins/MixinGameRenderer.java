@@ -34,9 +34,9 @@ public class MixinGameRenderer {
             boolean tick,
             CallbackInfo ci
     ) {
-    //#elseif MC == 1.20.1
-    //$$ public void hookRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
-    //#endif
+        //#elseif MC == 1.20.1
+        //$$ public void hookRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
+        //#endif
 
         NVGRenderer.INSTANCE.beginFrame(KnitResolution.getWindowWidth(), KnitResolution.getWindowHeight());
         if (
