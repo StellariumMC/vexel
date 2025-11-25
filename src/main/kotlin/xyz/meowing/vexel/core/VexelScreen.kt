@@ -27,8 +27,6 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
             hasInitialized = true
             initialized = true
 
-            NVGRenderer.cleanCache()
-
             afterInitialization()
 
             renderEvent = eventBus.register<GuiEvent.Render> {
