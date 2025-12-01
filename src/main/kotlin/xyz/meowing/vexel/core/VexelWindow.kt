@@ -1,10 +1,8 @@
 package xyz.meowing.vexel.core
 
 import xyz.meowing.knit.api.input.KnitMouse
-import xyz.meowing.knit.api.render.KnitResolution
 import xyz.meowing.vexel.animations.AnimationManager
 import xyz.meowing.vexel.components.base.VexelElement
-import xyz.meowing.vexel.utils.render.NVGRenderer
 
 class VexelWindow {
     val children: MutableList<VexelElement<*>> = mutableListOf()
@@ -24,12 +22,12 @@ class VexelWindow {
         AnimationManager.update()
     }
 
-    fun mouseClick(button: Int) {
-        children.reversed().forEach { it.handleMouseClick(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
+    fun mouseClick(button: Int): Boolean {
+        return children.reversed().any { it.handleMouseClick(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
-    fun mouseRelease(button: Int) {
-        children.reversed().forEach { it.handleMouseRelease(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
+    fun mouseRelease(button: Int): Boolean {
+        return children.reversed().any { it.handleMouseRelease(KnitMouse.Raw.x.toFloat(), KnitMouse.Raw.y.toFloat(), button) }
     }
 
     fun mouseMove() {
@@ -52,6 +50,5 @@ class VexelWindow {
         children.toList().forEach { it.destroy() }
         children.clear()
         AnimationManager.clear()
-        NVGRenderer.cleanCache()
     }
 }

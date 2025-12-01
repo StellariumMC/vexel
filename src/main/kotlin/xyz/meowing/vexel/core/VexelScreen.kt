@@ -6,7 +6,6 @@ import xyz.meowing.knit.api.input.KnitKeys
 import xyz.meowing.knit.api.screen.KnitScreen
 import xyz.meowing.vexel.Vexel.eventBus
 import xyz.meowing.vexel.events.GuiEvent
-import xyz.meowing.vexel.utils.render.NVGRenderer
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -52,12 +51,12 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
         window.onWindowResize()
     }
 
-    override fun onMouseClick(mouseX: Int, mouseY: Int, button: Int) {
-        window.mouseClick(button)
+    override fun onMouseClick(mouseX: Int, mouseY: Int, button: Int): Boolean {
+        return window.mouseClick(button)
     }
 
-    override fun onMouseRelease(mouseX: Int, mouseY: Int, button: Int) {
-        window.mouseRelease(button)
+    override fun onMouseRelease(mouseX: Int, mouseY: Int, button: Int): Boolean {
+        return window.mouseRelease(button)
     }
 
     override fun onMouseMove(mouseX: Int, mouseY: Int) {
@@ -68,9 +67,10 @@ abstract class VexelScreen(screenName: String = "Vexel-Screen") : KnitScreen(scr
         window.mouseScroll(horizontal, vertical)
     }
 
-    override fun onKeyType(typedChar: Char, keyCode: Int, scanCode: Int) {
+    override fun onKeyType(typedChar: Char, keyCode: Int, scanCode: Int): Boolean {
         val handled = window.charType(keyCode, scanCode, typedChar)
         if (!handled && keyCode == KnitKeys.KEY_ESCAPE.code) close()
+        return handled
     }
 
     /**

@@ -15,8 +15,7 @@ class SvgImage(
     var startingHeight: Float = 80f,
     var color: Color = Color.WHITE
 ) : VexelElement<SvgImage>() {
-    var imageId = "${UUID.randomUUID()}"
-    var image = NVGRenderer.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, imageId)
+    var image = NVGRenderer.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, UUID.randomUUID().toString())
     var rotation: Float = 0f
 
     init {
@@ -44,7 +43,7 @@ class SvgImage(
             NVGRenderer.translate(-centerX, -centerY)
         }
 
-        NVGRenderer.svg(imageId, x, y, startingWidth, startingHeight, color.alpha / 255f)
+        NVGRenderer.image(image, x, y, startingWidth, startingHeight)
 
         if (rotation != 0f) {
             NVGRenderer.pop()
@@ -59,11 +58,8 @@ class SvgImage(
     fun setSvgColor(newColor: Color) {
         if (color != newColor) {
             color = newColor
-            reloadImage()
+            NVGRenderer.deleteImage(image)
+            image = NVGRenderer.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, UUID.randomUUID().toString())
         }
-    }
-
-    private fun reloadImage() {
-        image = NVGRenderer.createImage(svgPath, startingWidth.toInt(), startingHeight.toInt(), color, imageId)
     }
 }

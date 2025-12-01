@@ -63,7 +63,6 @@ object NVGRenderer {
     private val fontBounds = FloatArray(4)
 
     private val images = HashMap<Image, NVGImage>()
-    private val svgCache = HashMap<String, NVGImage>()
 
     private var scissor: Scissor? = null
 
@@ -440,7 +439,7 @@ object NVGRenderer {
     }
 
     fun svg(id: String, x: Float, y: Float, w: Float, h: Float, a: Float = 1f) {
-        val nvg = svgCache[id]?.nvg ?: throw IllegalStateException("SVG Image (${id}) doesn't exist")
+        val nvg = getImage(Image(id))
 
         NanoVG.nvgImagePattern(vg, x, y, w, h, 0f, nvg, a, nvgPaint)
         NanoVG.nvgBeginPath(vg)
@@ -449,14 +448,14 @@ object NVGRenderer {
         NanoVG.nvgFill(vg)
     }
 
-    // Might have a memory leak if the menu is left and re-entered lots of times with unique ids
     fun createImage(resourcePath: String, width: Int = -1, height: Int = -1, color: Color = Color.WHITE, id: String): Image {
         val image = Image(resourcePath)
 
         if (image.isSVG) {
-            svgCache[id] = NVGImage(0, loadSVG(image, width, height, color))
-            svgCache[id]!!.count++
-        } else images.getOrPut(image) { NVGImage(0, loadImage(image)) }.count++
+            images.getOrPut(image) { NVGImage(0, loadSVG(image, width, height, color)) }.count++
+        } else {
+            images.getOrPut(image) { NVGImage(0, loadImage(image)) }.count++
+        }
         return image
     }
 
@@ -467,13 +466,6 @@ object NVGRenderer {
             NanoVG.nvgDeleteImage(vg, entry.value.nvg)
             iter.remove()
         }
-
-        val svgIter = svgCache.entries.iterator()
-        while (svgIter.hasNext()) {
-            val entry = svgIter.next()
-            NanoVG.nvgDeleteImage(vg, entry.value.nvg)
-            svgIter.remove()
-        }
     }
 
     // lowers reference count by 1, if it reaches 0 it gets deleted from mem
@@ -483,16 +475,6 @@ object NVGRenderer {
         if (nvgImage.count == 0) {
             NanoVG.nvgDeleteImage(vg, nvgImage.nvg)
             images.remove(image)
-        }
-    }
-
-    // Not used anywhere yet, but will prob have to use it at some point
-    fun deleteSVG(id: String) {
-        val nvgImage = svgCache[id] ?: return
-        nvgImage.count--
-        if (nvgImage.count == 0) {
-            NanoVG.nvgDeleteImage(vg, nvgImage.nvg)
-            svgCache.remove(id)
         }
     }
 
